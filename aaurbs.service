@@ -1,0 +1,6 @@
+[Unit]
+Description=aaurbs
+
+[Service]
+Type=simple
+ExecStart=/aur/updateall.sh

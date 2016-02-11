@@ -8,10 +8,11 @@ These two bash scripts are designed to build AUR packages and add them to a pacm
 - Apache/httpd folder `/srv/http/archlinux/` where all built packages and the repo file are stored, owned by user `aur`.
 - On the "client" an entry in `/etc/pacman.conf` with:
 ```
-[vps]
+[<db-name>]
 SigLevel = Never
 Server = http://<server-ip-address>/archlinux
 ```
+_Note, that `db-name` has to match the filename (`db-name.db.tar.gz`) in `updateall.sh`!_
 
 ### Planned
 - Webinterface (Python with flask, or PHP)

@@ -35,7 +35,7 @@ function move_new_package {
     if [ "`cat lastpkgver`" != "$package_name" ]; then
       mv $package_name $packages_dir
       new_packages+=($package_name)
-      echo "$package_name" >> lastpkgver
+      echo "$package_name" > lastpkgver
     else
       echo "Same version as last."
     fi

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="Sqlite (Xerial) - aaurbs.db" uuid="67c1daaf-f08c-434b-91e3-2ad733374a17">
+      <secret-storage>master_key</secret-storage>
+      <auth-required>false</auth-required>
+      <schema-pattern>*</schema-pattern>
+      <table-pattern>aaurbs</table-pattern>
+    </data-source>
+  </component>
+</project>

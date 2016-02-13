@@ -10,8 +10,8 @@ def main():
     def root():
         return send_from_directory('static', 'index.html')
 
-    @app.route('/api/')
-    def api_a():
+    @app.route('/api/add_package', methods=['POST'])
+    def add_package():
         print("hi")
         return 'OK'
 

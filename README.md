@@ -13,11 +13,3 @@ SigLevel = Never
 Server = http://<server-ip-address>/archlinux
 ```
 _Note, that `db-name` has to match the filename (`db-name.db.tar.gz`) in `updateall.sh`!_
-
-### Planned
-- Webinterface (Python with flask, or PHP)
-- Possible rewrite in a better scripting language (very likely Python).
-
-### Should/has to be fixed
-- All VCS packages should be treated the same (right now only `-git`)
-- Remove old packages from package directory (need database for that probably -> needs rewrite)!

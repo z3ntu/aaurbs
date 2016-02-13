@@ -5,7 +5,6 @@
       <secret-storage>master_key</secret-storage>
       <auth-required>false</auth-required>
       <schema-pattern>*</schema-pattern>
-      <table-pattern>aaurbs</table-pattern>
     </data-source>
   </component>
 </project>

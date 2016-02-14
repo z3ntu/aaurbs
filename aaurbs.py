@@ -17,10 +17,10 @@ LOG_PATH = AUR_BASE_PATH + "/logs"
 REPO_PATH = "/srv/http/archlinux"
 REPO_FILE = REPO_PATH + "/vps.db.tar.gz"
 
-database = sqlite3.connect(AUR_BASE_PATH + "/aaurbs.db")
-
 
 def main():
+    global database
+    database = sqlite3.connect(AUR_BASE_PATH + "/aaurbs.db")
     change_workdir(PACKAGES_PATH)
     set_user("luca")
     create_directories()
@@ -42,10 +42,18 @@ def create_database(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS packages (
             package_name VARCHAR(100),
-            build_status VARCHAR(100),
+            build_status VARCHAR(2),
             package_version VARCHAR(50),
             PRIMARY KEY (package_name)
         );
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            username VARCHAR(100),
+            password_hash VARCHAR(100),
+            user_role VARCHAR(2),
+            PRIMARY KEY (username)
+        )
     """)
 
 

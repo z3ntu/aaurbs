@@ -13,3 +13,8 @@ SigLevel = Never
 Server = http://<server-ip-address>/archlinux
 ```
 _Note, that `db-name` has to match the filename (`db-name.db.tar.gz`) in `updateall.sh`!_
+
+## Requirements
+- [Python 3](https://www.python.org/)
+- [Flask](http://flask.pocoo.org/)
+- [Flask-login](https://github.com/maxcountryman/flask-login)

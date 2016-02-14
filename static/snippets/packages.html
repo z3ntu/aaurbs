@@ -1,1 +1,23 @@
-<h1>WIP</h1>
+<div ng-controller="PackagesController">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Package-name</th>
+            <th>Package version</th>
+            <th>Build status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="package in packages">
+            <td>{{package.package_name}}</td>
+            <td>{{package.package_version}}</td>
+            <td><i class="fa" ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')"></i></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p>
+      <button uib-popover="I appeared on mouse enter!" popover-trigger="mouseenter" type="button" class="btn btn-default">Mouseenter</button>
+    </p>
+
+</div>

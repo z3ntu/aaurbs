@@ -13,4 +13,12 @@ __username__: username to log in
 
 __password_hash__: hash of the password to log in
 
-__user_role__: user role of the user (0=administrator, other value=something)
+__user_role__: user role of the user (0=administrator, 1=guest, other value=something)
+
+## Planned:
+### _Table_ `builds`:
+__package_name__: name of the package
+
+__build_date__: date the build happened
+
+__build_status__: result of the build (same statuses as in table packages)

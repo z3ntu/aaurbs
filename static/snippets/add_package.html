@@ -1,14 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add package</title>
-</head>
-<body>
-<h1>Add package</h1>
-<form action='api/add_package' method='POST'>
-    <input type='text' name='package_name' id='package_name' placeholder='Package name'>
-    <input type='submit' name='submit'>
-</form>
-</body>
-</html>
+<div ng-controller="AddPackageController">
+    <h2>Add package</h2>
+    <form novalidate class="simple-form">
+        <div class="form-group">
+            <label for="package_name">Package name:</label>
+            <input id="package_name" type="text" class="form-control" ng-model="package_name">
+        </div>
+        <button type="button" class="btn btn-default" ng-click="add_package(package_name)">Submit</button>
+    </form>
+    <p>{{response}}</p>
+</div>

@@ -33,8 +33,8 @@ def main():
 
 
 def test():
-    add_package("f3")
-    build_package("f3")
+    add_package("f3", database)
+    build_package("f3", database)
 
 
 def create_database(conn):
@@ -66,24 +66,26 @@ def change_workdir(directory):
     os.chdir(directory)
 
 
-def add_package(name):
-    if not os.path.isdir(name):
+def add_package(name, db):
+    if not os.path.isdir(PACKAGES_PATH + "/" + name):
+        change_workdir(PACKAGES_PATH)
         output = subprocess.check_output("git clone -q https://aur.archlinux.org/" + name + ".git", shell=True,
                                          stderr=subprocess.STDOUT).decode("utf-8")
         if output == "warning: You appear to have cloned an empty repository.\n":
             if os.path.isdir(PACKAGES_PATH + "/" + name):
                 shutil.rmtree(PACKAGES_PATH + "/" + name)
             print("Package does not exist!")
-            return
+            return False, "Package does not exist!"
         else:
-            database.execute(
+            db.execute(
                 "INSERT INTO packages (package_name, build_status, package_version) VALUES ('" + name + "', '0', '0');")
-            database.commit()
+            db.commit()
             print("Package successfully added.")
-            os.makedirs(LOG_PATH + "/name", exist_ok=True)
+            os.makedirs(LOG_PATH + "/" + name, exist_ok=True)
+            return True, ""
     else:
         print("Package '" + name + "' already added.")
-        return
+        return False, "Package was already added."
 
 
 def remove_package(name):

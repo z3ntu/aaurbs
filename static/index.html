@@ -1,36 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="aaurbs">
+<html lang="en" ng-app="aaurbsApp">
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="script" href="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js">
-    <link rel="script" href="js/aaurbs.js">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular-route.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular-animate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.1.2/ui-bootstrap-tpls.min.js"></script>
+    <script src="js/aaurbs.js"></script>
     <meta charset="UTF-8">
     <title>aaurbs</title>
+    <link rel="icon" type="image/png" href="favicon.png"/>
 </head>
 <body>
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-default" ng-controller="HeaderController">
     <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                     data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">aaurbs</a>
+            <a class="navbar-brand" href="#/">aaurbs</a>
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li>
-                <li><a href="#">Link</a></li>
+                <li ng-class="{active: isActive('/')}"><a href="#/">Home <span class="sr-only">(current)</span></a></li>
+                <li ng-class="{active: isActive('/packages')}"><a href="#/packages">Packages</a></li>
+                <li ng-class="{active: isActive('/add_package')}"><a href="#/add_package">Add package</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li ng-show="loggedin==false" ng-class="{active: isActive('/login')}"><a href="#/login">Login</a></li>
+                <li ng-show="loggedin==true"><a ng-click="logout()" href="">Logout</a></li>
             </ul>
         </div>
-
-    </div><!-- /.container-fluid -->
+    </div>
 </nav>
+<div ng-view></div>
 </body>
 </html>

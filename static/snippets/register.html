@@ -1,15 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Register</title>
-</head>
-<body>
-<h1>Register</h1>
-<form action='register' method='POST'>
-    <input type='text' name='username' id='username' placeholder='username'>
-    <input type='password' name='pw' id='pw' placeholder='password'>
-    <input type='submit' name='submit'>
-</form>
-</body>
-</html>
+<div ng-controller="RegisterController">
+    <h2>Register</h2>
+    <form novalidate class="simple-form">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" class="form-control" id="username" ng-model="username">
+        </div>
+        <div class="form-group">
+            <label for="pw">Password:</label>
+            <input type="password" class="form-control" id="pw" ng-model="pw">
+        </div>
+        <button type="button" class="btn btn-default" ng-click="register_user(username, pw)">Submit</button>
+    </form>
+</div>

@@ -5,5 +5,5 @@ Description=aaurbs_webserver
 Type=simple
 User=aur
 Group=aur
-WorkingDirectory=/root/git/aaurbs/
-ExecStart=/root/git/aaurbs/aaurbs_webserver.py
+WorkingDirectory=/aur/aaurbs/
+ExecStart=/aur/aaurbs/aaurbs_webserver.py

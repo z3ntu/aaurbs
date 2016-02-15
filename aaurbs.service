@@ -5,4 +5,4 @@ Description=aaurbs
 Type=simple
 User=aur
 Group=aur
-ExecStart=/root/git/aaurbs/aaurbs.py
+ExecStart=/aur/aaurbs/aaurbs.py

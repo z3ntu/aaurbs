@@ -29,7 +29,7 @@ app.controller("HeaderController", function ($scope, $location, $http) {
 
 app.controller("ProfileController", function ($scope, $http) {
     $http.get("/api/get_user_info").success(function (data) {
-        if(data.status == "error") {
+        if (data.status == "error") {
             $scope.error_message = data.error_message;
         } else {
             $scope.user = data;
@@ -37,13 +37,31 @@ app.controller("ProfileController", function ($scope, $http) {
     });
 });
 
-app.controller("PackagesController", function ($scope, $http) {
+app.controller("PackagesController", function ($scope, $http, $uibModal) {
     $scope.reasons = ["Unknown status", "Success", "Unknown error!", "A failure occurred in check()."];
     $scope.sortField = 'package_name';
-    $scope.reverse = true;
+    $scope.reverse = false;
     $http.get("/api/get_packages").success(function (data) {
         $scope.packages = data;
     });
+
+    $scope.openModal = function(package_info) {
+        console.log(package_info);
+        $uibModal.open({
+            templateUrl: 'package_info_modal.html',
+            controller: 'ModalController',
+            size: "lg",
+            resolve: {
+                items: function () {
+                    return $scope.items;
+                }
+            }
+        });
+    }
+});
+
+app.controller("ModalController", function($scope, $http) {
+
 });
 
 app.controller("AddPackageController", function ($scope, $http) {

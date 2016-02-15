@@ -62,7 +62,7 @@ def main():
         if flask_login.current_user.role != "0":
             return flask.Response("{\"status\": \"error\", \"error_message\": \"No permission.\"}", mimetype="application/json")
         packagename = flask.request.json.get('package_name')
-        status, error_message = add_package(packagename, get_db()) # TODO: Use AUR user
+        status, error_message = add_package(packagename, get_db())
         print("Adding package '" + packagename + "', requested by user '" + flask_login.current_user.username + "'")
         if status:
             return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")

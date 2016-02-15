@@ -2,19 +2,41 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th ng-click="sortField = 'package_name'; reverse = !reverse">Package-name</th>
-            <th ng-click="sortField = 'package_version'; reverse = !reverse">Package version</th>
-            <th ng-click="sortField = 'build_status'; reverse = !reverse">Build status</th>
+            <th ng-click="sortField = 'package_name'; reverse = !reverse" style="cursor: pointer;">Package-name</th>
+            <th ng-click="sortField = 'package_version'; reverse = !reverse" style="cursor: pointer;">Package version
+            </th>
+            <th ng-click="sortField = 'build_status'; reverse = !reverse" style="cursor: pointer;">Build status</th>
         </tr>
         </thead>
         <tbody>
         <!--TODO: Modal dialog when clicking on package, option to view log & restart/start build-->
-        <tr ng-repeat="package in packages | orderBy:sortField:reverse">
+        <tr ng-repeat="package in packages | orderBy:sortField:reverse" ng-click="openModal(package)">
             <td>{{package.package_name}}</td>
             <td ng-show="package.package_version!=0">{{package.package_version}}</td>
-            <td ng-show="package.package_version==0"><i class="fa fa-question" uib-popover="{{reasons[0]}}" popover-trigger="mouseenter"></i></td>
-            <td><i class="fa" ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')" uib-popover="{{reasons[package.build_status]}}" popover-trigger="mouseenter"></i></td>
+            <td ng-show="package.package_version==0"><i class="fa fa-question" uib-popover="{{reasons[0]}}"
+                                                        popover-trigger="mouseenter"></i></td>
+            <td><i class="fa"
+                   ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')"
+                   uib-popover="{{reasons[package.build_status]}}" popover-trigger="mouseenter"></i></td>
         </tr>
         </tbody>
     </table>
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title">I'm a modal!</h3>
+        </div>
+        <div class="modal-body">
+            <ul>
+                <li ng-repeat="item in items">
+                    <a href="#" ng-click="$event.preventDefault(); selected.item = item">{{ item }}</a>
+                </li>
+            </ul>
+            Selected: <b>{{ selected.item }}</b>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+    <button type="button" class="btn btn-default" ng-click="open()">Open me!</button>
 </div>

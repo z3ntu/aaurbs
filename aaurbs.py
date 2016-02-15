@@ -107,12 +107,17 @@ def build_package(name):
                                          stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as e:  # non-zero exit code
         if b"ERROR: A package has already been built." in e.output:
-            print("Warning: Package has already been built.")
+            print("Warning: Package has already been built.")  # This is no error!
+            return "1"
+        elif b"ERROR: A failure occurred in check()." in e.output:
+            print("ERROR: A failure occurred in check().")
+            error_status = "3"
         else:
             print(e.output)
-            log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", e.output.decode("utf-8"))
-            database.execute("UPDATE packages SET build_status=2 WHERE package_name='" + name + "'")
-        return
+            error_status = "2"
+        log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", e.output.decode("utf-8"))
+        database.execute("UPDATE packages SET build_status="+error_status+" WHERE package_name='" + name + "'")
+        return error_status
     change_workdir(PACKAGES_PATH)
     # save output into logfile
     log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", output)
@@ -129,7 +134,7 @@ def build_package(name):
             database.execute(
                 "UPDATE packages SET build_status=1, package_version='" + version + "' WHERE package_name='" + name + "'")
             add_to_repo(REPO_PATH + "/" + file)
-            break
+            return "1"
 
 
 def add_to_repo(filename):

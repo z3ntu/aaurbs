@@ -38,7 +38,7 @@ app.controller("ProfileController", function ($scope, $http) {
 });
 
 app.controller("PackagesController", function ($scope, $http) {
-    $scope.reasons = ["Unknown", "Success", "Unknown error"];
+    $scope.reasons = ["Unknown status", "Success", "Unknown error!", "A failure occurred in check()."];
     $scope.sortField = 'package_name';
     $scope.reverse = true;
     $http.get("/api/get_packages").success(function (data) {

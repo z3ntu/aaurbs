@@ -3,9 +3,9 @@
 ### _Table `packages`_:
 __package_name__: name of the package
 
-__build_status__: build status (0=unbuilt, 1=successful, 2=fail, more reasons to come!)
+__build_status__: build status (0=unbuilt, 1=successful, 2=unknown error, 3=error in check(), more reasons to come!)
 
-__package_version__: last known package version (0=unbuilt/not defined, other value=version)
+__package_version__: last known package version (0=unknown, other value=version)
 
 
 ### _Table `users`_:
@@ -22,3 +22,5 @@ __package_name__: name of the package
 __build_date__: date the build happened
 
 __build_status__: result of the build (same statuses as in table packages)
+
+__build_duration__: duration of the build

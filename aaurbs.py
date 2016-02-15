@@ -143,7 +143,7 @@ def add_to_repo(filename):
     output = subprocess.check_output("repo-add --remove " + REPO_FILE + " " + filename,
                                      shell=True,
                                      stderr=subprocess.STDOUT).decode("utf-8")
-    log_to_file(LOG_PATH + "/repo-add.log", output)
+    log_to_file(LOG_PATH + "/repo-add.log", output, mode="a")
 
 
 def update_packages():
@@ -178,8 +178,8 @@ def create_directories():
     os.makedirs(PKGDEST, exist_ok=True)
 
 
-def log_to_file(filename, content):
-    logfile = open(filename, mode="w", encoding="utf-8")
+def log_to_file(filename, content, mode="w"):
+    logfile = open(filename, mode=mode, encoding="utf-8")
     logfile.write(content)
     logfile.close()
 

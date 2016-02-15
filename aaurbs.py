@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import shutil
 import re
+import config
 from time import strftime, gmtime
 
 AUR_BASE_PATH = "/aur"
@@ -22,7 +23,7 @@ def main():
     global database
     database = sqlite3.connect(AUR_BASE_PATH + "/aaurbs.db")
     change_workdir(PACKAGES_PATH)
-    set_user("luca")
+    set_user(config.aur_user)
     create_directories()
     create_database(database)
     # test()
@@ -150,7 +151,8 @@ def update_packages():
             build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs package
             build_package(package)
-        elif database.execute("SELECT build_status FROM packages WHERE package_name='" + package + "'").fetchone()[0] != "1":  # package status is not successful
+        elif database.execute("SELECT build_status FROM packages WHERE package_name='" + package + "'").fetchone()[
+            0] != "1":  # package status is not successful
             build_package(package)
         else:
             print("Package '" + package + "' is already up-to-date.")

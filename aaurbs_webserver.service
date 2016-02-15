@@ -1,0 +1,6 @@
+[Unit]
+Description=aaurbs_webserver
+
+[Service]
+Type=simple
+ExecStart=/root/git/aaurbs/aaurbs_webserver.py

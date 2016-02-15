@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import flask
 from aaurbs import AUR_BASE_PATH, add_package, LOG_PATH
 import sys

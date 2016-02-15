@@ -174,7 +174,7 @@ def create_directories():
 
 
 def log_to_file(filename, content):
-    logfile = open(filename, "w")
+    logfile = open(filename, mode="w", encoding="utf-8")
     logfile.write(content)
     logfile.close()
 

@@ -3,5 +3,7 @@ Description=aaurbs_webserver
 
 [Service]
 Type=simple
-ExecStart=/root/git/aaurbs/aaurbs_webserver.py
+User=aur
+Group=aur
 WorkingDirectory=/root/git/aaurbs/
+ExecStart=/root/git/aaurbs/aaurbs_webserver.py

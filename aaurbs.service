@@ -3,4 +3,6 @@ Description=aaurbs
 
 [Service]
 Type=simple
+User=aur
+Group=aur
 ExecStart=/root/git/aaurbs/aaurbs.py

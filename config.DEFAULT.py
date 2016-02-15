@@ -1,6 +1,7 @@
 # Create the secret key with:
 # import os
 # os.urandom(24)
-secret_key = b'value'
 # KEEP IT SECRET!
-aur_user = "aur"
+secret_key = b'paste-here'
+# If flask should be started in debug mode
+debug = False

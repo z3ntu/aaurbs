@@ -23,7 +23,7 @@ def main():
     global database
     database = sqlite3.connect(AUR_BASE_PATH + "/aaurbs.db")
     change_workdir(PACKAGES_PATH)
-    set_user(config.aur_user)
+    # set_user(config.aur_user)
     create_directories()
     create_database(database)
     # test()
@@ -110,7 +110,7 @@ def build_package(name):
             print("Warning: Package has already been built.")
         else:
             print(e.output)
-            log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", e.output)
+            log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", e.output.decode("utf-8"))
             database.execute("UPDATE packages SET build_status=2 WHERE package_name='" + name + "'")
         return
     change_workdir(PACKAGES_PATH)

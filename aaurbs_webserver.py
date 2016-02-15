@@ -29,7 +29,6 @@ def main():
     @app.route('/api/register', methods=['POST'])
     def register():
         # TODO: SQL injection proof
-        # TODO: Check if user already exists!
         username = flask.request.json.get('username')
         passwordhash = generate_password_hash(flask.request.json.get('pw'))
         db = get_db()
@@ -43,6 +42,7 @@ def main():
     @app.route('/api/login', methods=['POST'])
     def login():
         username = flask.request.form['username']
+        # TODO: application crashes if user does not exist.
         if check_password_hash(get_db().execute("SELECT password_hash FROM users WHERE username='"+username+"'").fetchone()[0], flask.request.form['pw']):
             user = User()
             user.id = username
@@ -62,7 +62,7 @@ def main():
         if flask_login.current_user.role != "0":
             return flask.Response("{\"status\": \"error\", \"error_message\": \"No permission.\"}", mimetype="application/json")
         packagename = flask.request.json.get('package_name')
-        status, error_message = add_package(packagename, get_db())
+        status, error_message = add_package(packagename, get_db()) # TODO: Use AUR user
         print("Adding package '" + packagename + "', requested by user '" + flask_login.current_user.username + "'")
         if status:
             return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
@@ -142,7 +142,7 @@ def main():
     try:
         app.run(host='0.0.0.0',
                 port=8080,
-                debug=True)
+                debug=config.debug)
     except OSError as err:
         print("[ERROR] " + err.strerror, file=sys.stderr)
         print("[ERROR] The program will now terminate.", file=sys.stderr)

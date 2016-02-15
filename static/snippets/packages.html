@@ -2,22 +2,19 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th>Package-name</th>
-            <th>Package version</th>
-            <th>Build status</th>
+            <th ng-click="sortField = 'package_name'; reverse = !reverse">Package-name</th>
+            <th ng-click="sortField = 'package_version'; reverse = !reverse">Package version</th>
+            <th ng-click="sortField = 'build_status'; reverse = !reverse">Build status</th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="package in packages">
+        <!--TODO: Modal dialog when clicking on package, option to view log & restart/start build-->
+        <tr ng-repeat="package in packages | orderBy:sortField:reverse">
             <td>{{package.package_name}}</td>
-            <td>{{package.package_version}}</td>
-            <td><i class="fa" ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')"></i></td>
+            <td ng-show="package.package_version!=0">{{package.package_version}}</td>
+            <td ng-show="package.package_version==0"><i class="fa fa-question" uib-popover="{{reasons[0]}}" popover-trigger="mouseenter"></i></td>
+            <td><i class="fa" ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')" uib-popover="{{reasons[package.build_status]}}" popover-trigger="mouseenter"></i></td>
         </tr>
         </tbody>
     </table>
-
-    <p>
-      <button uib-popover="I appeared on mouse enter!" popover-trigger="mouseenter" type="button" class="btn btn-default">Mouseenter</button>
-    </p>
-
 </div>

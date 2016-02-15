@@ -1,0 +1,4 @@
+<div ng-controller="ProfileController">
+    <p ng-if="user != null">Logged in as {{user.username}}, Role {{user.role}}</p>
+    <h3 ng-if="user == null">{{error_message}}</h3>
+</div>

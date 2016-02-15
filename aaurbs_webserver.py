@@ -31,6 +31,9 @@ def main():
         username = flask.request.json.get('username')
         passwordhash = generate_password_hash(flask.request.json.get('pw'))
         db = get_db()
+        userexists = len(db.execute("SELECT username FROM users WHERE username='"+username+"'").fetchall()) != 0
+        if userexists:
+            return flask.Response("{\"status\": \"error\", \"error_message\": \"User already exists.\"}", mimetype="application/json")
         db.execute("INSERT INTO users (username, password_hash, user_role) VALUES ('" + username + "', '" + passwordhash + "', '1')")
         db.commit()
         return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
@@ -42,7 +45,7 @@ def main():
             user = User()
             user.id = username
             flask_login.login_user(user)
-            return flask.redirect("#/protected")
+            return flask.redirect("#/profile")
 
         return flask.Response("{\"status\": \"error\", \"error_message\": \"Bad login.\"}", mimetype="application/json")
 
@@ -54,6 +57,8 @@ def main():
     @app.route('/api/add_package', methods=['POST'])
     @flask_login.login_required
     def add_package_web():
+        if flask_login.current_user.role != "0":
+            return flask.Response("{\"status\": \"error\", \"error_message\": \"No permission.\"}", mimetype="application/json")
         packagename = flask.request.json.get('package_name')
         status, error_message = add_package(packagename, get_db())
         print("Adding package '" + packagename + "', requested by user '" + flask_login.current_user.username + "'")
@@ -104,10 +109,10 @@ def main():
         print("Catch-all: " + filename)
         return flask.send_from_directory('static', filename)
 
-    @app.route('/protected')
-    @flask_login.login_required
-    def protected():
-        return 'Logged in as: ' + flask_login.current_user.username + "\nRole: " + flask_login.current_user.role
+    # @app.route('/profile')
+    # @flask_login.login_required
+    # def protected():
+    #     return 'Logged in as: ' + flask_login.current_user.username + "\nRole: " + flask_login.current_user.role
 
     @login_manager.user_loader  # should create user object (get from database etc)
     def user_loader(username):
@@ -129,7 +134,7 @@ def main():
 
     @login_manager.unauthorized_handler
     def unauthorized_handler():
-        return flask.Response("{\"error\": \"not authorized\"}", mimetype="application/json")
+        return flask.Response("{\"status\": \"error\", \"error_message\": \"Not authorized.\"}", mimetype="application/json")
 
     # ACTUAL METHOD
     try:

@@ -81,12 +81,15 @@ def add_package(name, db):
 
 
 def remove_package(name):
-    if os.path.isdir(PACKAGES_PATH + "/" + name):
+    if os.path.isdir(PACKAGES_PATH + "/" + name) and os.path.isdir(LOG_PATH + "/" + name):
         shutil.rmtree(PACKAGES_PATH + "/" + name)
+        shutil.rmtree(LOG_PATH + "/" + name)
         database.execute("DELETE FROM packages WHERE package_name='" + name + "'")
         print("Removed package '" + name + "'")
+        return True
     else:
         print("Package '" + name + "' is invalid.")
+        return False
 
 
 def build_package(name):

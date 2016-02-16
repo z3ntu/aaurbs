@@ -14,6 +14,7 @@
 - Flask
 - AngularJS
 - Bootstrap
+- UI Bootstrap
 
 ### No error:
 `==> ERROR: A package has already been built. (use -f to overwrite)`

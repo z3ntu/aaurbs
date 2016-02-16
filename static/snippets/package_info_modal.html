@@ -1,1 +1,16 @@
-<p>Package {{package.package_name}}</p>
+<div style="margin: 15px;">
+    <div class="modal-header">
+        <h2 class="modal-title">Package <b>{{package.package_name}}</b></h2>
+    </div>
+    <div class="modal-body">
+        <p><b>Package version: </b>{{package.package_version}}</p>
+        <p><b>Build status: </b>{{reasons[package.build_status]}}</p>
+        <button class="btn btn-primary" type="button" ng-click="toggle_log()">Show/hide build log</button>
+        <pre style="margin-top: 10px;" id="build_log" uib-collapse="isCollapsed">{{build_log}}</pre>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-danger" type="button" ng-click="remove_dialog(package.package_name)" ng-show="loggedin">Remove package</button>
+        <button class="btn btn-default" type="button" ng-click="close()">Close</button>
+    </div>
+
+</div>

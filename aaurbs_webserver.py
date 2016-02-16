@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import flask
-from aaurbs import AUR_BASE_PATH, add_package, LOG_PATH
+from aaurbs import AUR_BASE_PATH, LOG_PATH, add_package, remove_package
 import sys
 import os
 import json
@@ -41,20 +41,20 @@ def main():
 
     @app.route('/api/login', methods=['POST'])
     def login():
-        username = flask.request.form['username']
-        # TODO: application crashes if user does not exist.
-        if check_password_hash(get_db().execute("SELECT password_hash FROM users WHERE username='"+username+"'").fetchone()[0], flask.request.form['pw']):
+        username = flask.request.json.get('username')
+        pass_hash = get_db().execute("SELECT password_hash FROM users WHERE username='"+username+"'").fetchone()
+        if pass_hash is not None and check_password_hash(pass_hash[0], flask.request.json.get('pw')):
             user = User()
             user.id = username
             flask_login.login_user(user)
-            return flask.redirect("#/profile")
+            return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
 
         return flask.Response("{\"status\": \"error\", \"error_message\": \"Bad login.\"}", mimetype="application/json")
 
     @app.route('/api/logout', methods=['POST'])
     def logout():
         flask_login.logout_user()
-        return 'Logged out'
+        return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
 
     @app.route('/api/add_package', methods=['POST'])
     @flask_login.login_required
@@ -70,6 +70,18 @@ def main():
             return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
         else:
             return flask.Response("{\"status\": \"error\", \"error_message\": \""+error_message+"\"}", mimetype="application/json")
+
+    @app.route('/api/remove_package', methods=['POST'])
+    @flask_login.login_required
+    def remove_package_web():
+        if flask_login.current_user.role != "0":
+            return flask.Response("{\"status\": \"error\", \"error_message\": \"No permission.\"}", mimetype="application/json")
+        packagename = flask.request.json.get('package_name')
+        print("Removing package '" + packagename + "', requested by user '" + flask_login.current_user.username + "'")
+        if remove_package(packagename):
+            return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
+        else:
+            return flask.Response("{\"status\": \"error\", \"error_message\": \"Package is invalid.\"}", mimetype="application/json")
 
     @app.route('/api/get_user_info')
     @flask_login.login_required

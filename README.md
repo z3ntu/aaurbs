@@ -1,6 +1,6 @@
 # Automated AUR build system
 
-These two bash scripts are designed to build AUR packages and add them to a pacman-usable repository.
+aaurbs is designed to build AUR packages and add them to a pacman-usable repository.
 
 ## Setup:
 - User `aur` which has a no-password sudo access for pacman (`aur ALL=(ALL) NOPASSWD: /usr/bin/pacman`).

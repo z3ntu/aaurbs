@@ -118,7 +118,10 @@ def main():
             if not directory:
                 return "{\"error\": \"no logs for package found\"}"
             directory.sort(reverse=True)
-            return flask.Response(open(LOG_PATH + "/" + package_name + "/" + directory[0]).read(), mimetype="text/plain")
+            try:
+                return flask.Response(open(LOG_PATH + "/" + package_name + "/" + directory[0]).read(), mimetype="text/plain")
+            except UnicodeDecodeError as e:
+                return flask.Response("Error while reading the log file: " + e.reason, mimetype="text/plain")
 
     @app.route('/<path:filename>')
     def catch_all(filename):

@@ -19,14 +19,19 @@ app.controller("HeaderController", function ($scope, $rootScope, $location, $htt
     };
     $http.get("/api/get_user_info").success(function (data) {
         $rootScope.loggedin = data.status != "error";
+        $rootScope.user = data;
     });
     $scope.logout = function () {
-        $http.post("/api/logout", null);
-        $rootScope.loggedin = false;
+        $http.post("/api/logout", null).success(function(data) {
+            $rootScope.loggedin = false;
+            $rootScope.user = null;
+            $location.path("/");
+        });
     };
 });
 
-app.controller("ProfileController", function ($scope, $http) {
+app.controller("ProfileController", function ($scope, $rootScope, $http) {
+    $rootScope.roles = ["Administator", "Guest"];
     $http.get("/api/get_user_info").success(function (data) {
         if (data.status == "error") {
             $scope.error_message = data.error_message;
@@ -102,13 +107,21 @@ app.controller("ModalController", function ($scope, $rootScope, $http, $uibModal
     };
 });
 
-app.controller("ConfirmationDialogController", function($scope, $uibModalInstance, package_name) {
+app.controller("ConfirmationDialogController", function($scope, $uibModalInstance, $http, package_name) {
     $scope.package_name = package_name;
     $scope.cancel = function() {
         $uibModalInstance.close(false);
     };
-    $scope.remove = function() {
-        $uibModalInstance.close([true, package_name]);
+    $scope.remove = function(package_name) {
+        console.log("Removing package '" + package_name + "'.");
+        $http.post("/api/remove_package", {"package_name": package_name}).success(function (data) {
+            if (data.status == "error") {
+                $scope.response = "Error while removing package: " + data.error_message;
+            } else {
+                console.log("Package '" + package_name + "' was successfully removed.");
+                $uibModalInstance.close([true, package_name]);
+            }
+        });
     }
 });
 
@@ -132,6 +145,8 @@ app.controller("RegisterController", function ($scope, $http) {
             } else {
                 $scope.response = "User '" + username + "' was successfully registered.";
                 $scope.success = true;
+                $scope.username = "";
+                $scope.pw = "";
             }
         });
     }

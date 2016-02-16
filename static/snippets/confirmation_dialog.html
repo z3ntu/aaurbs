@@ -1,7 +1,8 @@
 <div class="modal-header">
-    <p>Are you sure you want to remove the package '{{package_name}}'?</p>
+    <p>Are you sure you want to remove the package '<b>{{package_name}}</b>'?</p>
+    <p><b>{{response}}</b></p>
 </div>
 <div class="modal-footer">
     <button class="btn btn-default" type="button" ng-click="cancel()">Cancel</button>
-    <button class="btn btn-danger" type="button" ng-click="remove()">Remove package</button>
+    <button class="btn btn-danger" type="button" ng-click="remove(package_name)">Remove package</button>
 </div>

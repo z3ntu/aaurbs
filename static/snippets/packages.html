@@ -11,8 +11,8 @@
         <tbody>
         <tr ng-repeat="package in packages | orderBy:sortField:reverse" ng-click="openModal(package)">
             <td>{{package.package_name}}</td>
-            <td ng-show="package.package_version!=0">{{package.package_version}}</td>
-            <td ng-show="package.package_version==0"><i class="fa fa-question" uib-popover="{{reasons[0]}}"
+            <td ng-if="package.package_version!=0">{{package.package_version}}</td>
+            <td ng-if="package.package_version==0"><i class="fa fa-question" uib-popover="{{reasons[0]}}"
                                                         popover-trigger="mouseenter"></i></td>
             <td><i class="fa"
                    ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')"

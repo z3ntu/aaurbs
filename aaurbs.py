@@ -15,7 +15,7 @@ PACKAGES_PATH = AUR_BASE_PATH + "/packages"
 LOG_PATH = AUR_BASE_PATH + "/logs"
 
 REPO_PATH = config.repo_path
-REPO_FILE = REPO_PATH + "/"+config.repo_name+".db.tar.gz"
+REPO_FILE = REPO_PATH + "/" + config.repo_name + ".db.tar.gz"
 
 
 def main():
@@ -80,11 +80,12 @@ def add_package(name, db):
         return False, "Package was already added."
 
 
-def remove_package(name):
+def remove_package(name, db):
     if os.path.isdir(PACKAGES_PATH + "/" + name) and os.path.isdir(LOG_PATH + "/" + name):
         shutil.rmtree(PACKAGES_PATH + "/" + name)
         shutil.rmtree(LOG_PATH + "/" + name)
-        database.execute("DELETE FROM packages WHERE package_name='" + name + "'")
+        db.execute("DELETE FROM packages WHERE package_name='" + name + "'")
+        db.commit()
         print("Removed package '" + name + "'")
         return True
     else:
@@ -109,8 +110,9 @@ def build_package(name):
         else:
             print(e.output)
             error_status = "2"
-        log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", e.output.decode("utf-8"))
-        database.execute("UPDATE packages SET build_status="+error_status+" WHERE package_name='" + name + "'")
+        log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log",
+                    e.output.decode("utf-8"))
+        database.execute("UPDATE packages SET build_status=" + error_status + " WHERE package_name='" + name + "'")
         return error_status
     change_workdir(PACKAGES_PATH)
     # save output into logfile
@@ -150,7 +152,8 @@ def update_packages():
             build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
             build_package(package)
-        elif database.execute("SELECT build_status FROM packages WHERE package_name='" + package + "'").fetchone()[0] != "1":  # package status is not successful
+        elif database.execute("SELECT build_status FROM packages WHERE package_name='" + package + "'").fetchone()[
+            0] != "1":  # package status is not successful
             build_package(package)
         else:
             print("Package '" + package + "' is already up-to-date.")

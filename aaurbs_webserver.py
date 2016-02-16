@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
-import flask
-from aaurbs import AUR_BASE_PATH, LOG_PATH, REPO_PATH, add_package, remove_package
-import sys
-import os
 import json
-import config
+import os
 import sqlite3
+import sys
+
+import flask
 import flask.ext.login as flask_login
 from werkzeug.security import generate_password_hash, check_password_hash
-import re
+
+import config
+from aaurbs import AUR_BASE_PATH, LOG_PATH, REPO_PATH, add_package, remove_package
 
 
 class User(flask_login.UserMixin):
@@ -29,7 +30,7 @@ def main():
 
     @app.route('/api/register', methods=['POST'])
     def register():
-        # TODO: SQL injection proof
+        # TODO: SQL injection proof (practically everywhere)
         username = flask.request.json.get('username')
         passwordhash = generate_password_hash(flask.request.json.get('pw'))
         db = get_db()

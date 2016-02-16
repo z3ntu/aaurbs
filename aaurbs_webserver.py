@@ -121,7 +121,7 @@ def main():
             try:
                 return flask.Response(open(LOG_PATH + "/" + package_name + "/" + directory[0]).read(), mimetype="text/plain")
             except UnicodeDecodeError as e:
-                return flask.Response("Error while reading the log file: " + e.reason, mimetype="text/plain")
+                return flask.Response("Error while reading the log file: " + str(e), mimetype="text/plain")
 
     @app.route('/<path:filename>')
     def catch_all(filename):

@@ -160,6 +160,7 @@ app.controller("LoginController", function($scope, $http, $location, $rootScope)
             } else {
                 $scope.response = "You were successfully logged in.";
                 $rootScope.loggedin = true;
+                $rootScope.user = data;
                 $location.path("profile"); // redirect to profile
             }
         });

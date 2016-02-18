@@ -91,12 +91,12 @@ def main():
             return flask.Response("{\"status\": \"error\", \"error_message\": \"Package is invalid.\"}",
                                   mimetype="application/json")
 
-    @app.route('/api/get_user_info')
+    @app.route('/api/get_user_info', methods=['GET'])
     @flask_login.login_required
     def get_user_info():
         return flask.Response(json.dumps(flask_login.current_user.__dict__), mimetype="application/json")
 
-    @app.route('/api/get_packages')
+    @app.route('/api/get_packages', methods=['GET'])
     def get_packages():
         db_packages = get_db().execute("SELECT * FROM packages").fetchall()
         packages = []
@@ -104,7 +104,7 @@ def main():
             packages.append({"package_name": package[0], "build_status": package[1], "package_version": package[2]})
         return flask.Response(json.dumps(packages), mimetype="application/json")
 
-    @app.route('/api/get_package_info')
+    @app.route('/api/get_package_info', methods=['GET'])
     def get_package_info():
         package_name = flask.request.args.get("package_name")
         if package_name is None:
@@ -115,7 +115,7 @@ def main():
             return flask.Response("{\"status\": \"error\", \"error_message\": \"package not found\"}",
                                   mimetype="application/json")
         return flask.Response(
-            json.dumps({"package_name": package[0], "build_status": package[1], "package_version": package[2]}),
+            json.dumps({"status": "ok", "package_name": package[0], "build_status": package[1], "package_version": package[2]}),
             mimetype="application/json")
 
     @app.route('/api/get_build_log')
@@ -152,21 +152,16 @@ def main():
         package_version = get_db().execute(
             "SELECT package_version FROM packages WHERE package_name='" + package_name + "'").fetchone()
         if package_version is None:
-            return "Error."
+            return flask.Response("Package not found.", mimetype="text/plain")
         package_version = package_version[0]
         for file in os.listdir(REPO_PATH):
             if file.endswith(".pkg.tar.xz") and file.startswith(package_name + "-" + package_version):
                 return flask.send_file(REPO_PATH + "/" + file, as_attachment=True, attachment_filename=file)
-        return "Error."
+        return flask.Response("Binary package not found.", mimetype="text/plain")
 
     @app.route('/<path:filename>')
     def catch_all(filename):
-        print("Catch-all: " + filename)
         return flask.send_from_directory('static', filename)
-
-    # @app.errorhandler(404)
-    # def not_found(error=None):
-    #     return "<img src=\"https://http.cat/404.jpg\">"
 
     @login_manager.user_loader  # should create user object (get from database etc)
     def user_loader(username):

@@ -93,11 +93,11 @@ def remove_package(name, db):
         return False
 
 
-def build_package(name):
+def build_package(name, clean="c"):
     print("Building package '" + name + "'.")
     change_workdir(PACKAGES_PATH + "/" + name)
     try:
-        output = subprocess.check_output("PKGDEST='" + REPO_PATH + "' makepkg -src --noconfirm --noprogressbar",
+        output = subprocess.check_output("PKGDEST='" + REPO_PATH + "' makepkg -sr"+clean+" --noconfirm --noprogressbar",
                                          shell=True,
                                          stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as e:  # non-zero exit code
@@ -151,7 +151,7 @@ def update_packages():
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
-            build_package(package)
+            build_package(package, clean="")
         elif database.execute("SELECT build_status FROM packages WHERE package_name='" + package + "'").fetchone()[
             0] != "1":  # package status is not successful
             build_package(package)

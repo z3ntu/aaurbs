@@ -16,18 +16,20 @@
 <nav class="navbar navbar-default" ng-controller="HeaderController">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <button type="button" class="navbar-toggle collapsed" aria-expanded="false" ng-click="navCollapsed = !navCollapsed">
                 <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="#/">aaurbs</a>
         </div>
 
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div class="collapse navbar-collapse" uib-collapse="navCollapsed" ng-click="navCollapsed=true;">
             <ul class="nav navbar-nav">
                 <li ng-class="{active: isActive('/')}"><a href="#/">Home <span class="sr-only">(current)</span></a></li>
                 <li ng-class="{active: isActive('/packages')}"><a href="#/packages">Packages</a></li>
-                <li ng-show="user.user_role == 0" ng-class="{active: isActive('/add_package')}"><a href="#/add_package">Add package</a></li>
+                <li ng-show="user.role == '0'" ng-class="{active: isActive('/add_package')}"><a href="#/add_package">Add package</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li ng-show="loggedin" ng-class="{active: isActive('/profile')}"><a href="#/profile">Profile</a></li>

@@ -14,6 +14,7 @@ app.controller("CatchAllCtrl", function ($scope, $routeParams) {
 });
 
 app.controller("HeaderController", function ($scope, $rootScope, $location, $http) {
+    $scope.navCollapsed = true;
     $scope.isActive = function (viewLocation) {
         return viewLocation === $location.path();
     };

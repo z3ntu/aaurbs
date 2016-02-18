@@ -1,9 +1,12 @@
 <div ng-controller="AddPackageController">
     <h2>Add package</h2>
     <form novalidate class="simple-form">
-        <div class="form-group">
+        <div class="form-group has-feedback" style="max-width: 300px;">
             <label for="package_name">Package name:</label>
-            <input id="package_name" type="text" class="form-control" ng-model="package_name">
+            <input id="package_name" type="text" class="form-control" ng-model="package_name" ng-change="change_handler(package_name)">
+            <span class="form-control-feedback">
+                <i class="fa" ng-class="valid_package ? 'fa-check' : 'fa-times'"></i>
+            </span>
         </div>
         <button type="button" class="btn btn-default" ng-click="add_package(package_name)">Submit</button>
     </form>

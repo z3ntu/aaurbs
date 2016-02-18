@@ -15,7 +15,7 @@ __password_hash__: hash of the password to log in
 
 __user_role__: user role of the user (0=administrator, 1=guest, other value=something)
 
-## Planned:
+## Planned (maybe, just maybe...):
 ### _Table_ `builds`:
 __package_name__: name of the package
 

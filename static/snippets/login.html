@@ -1,6 +1,6 @@
 <div ng-controller="LoginController">
     <h2>Login</h2>
-    <form novalidate class="simple-form" ng-submit="login(username, pw)">
+    <form novalidate class="simple-form" ng-submit="login(username, pw)" style="max-width: 300px;">
         <div class="form-group">
             <label for="username">Username:</label>
             <input type="text" class="form-control" id="username" ng-model="username">
@@ -14,5 +14,5 @@
     <br>
     <p><b>{{response}}</b></p>
     <br>
-    <a href="#/register">No account? Register now!</a>
+    <a href="#/register">No account? Register now!</a> (you can't do more after registering... :D)
 </div>

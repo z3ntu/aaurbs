@@ -23,7 +23,7 @@ app.controller("HeaderController", function ($scope, $rootScope, $location, $htt
         $rootScope.user = data;
     });
     $scope.logout = function () {
-        $http.post("/api/logout", null).success(function(data) {
+        $http.post("/api/logout", null).success(function (data) {
             $rootScope.loggedin = false;
             $rootScope.user = null;
             $location.path("/");
@@ -63,7 +63,7 @@ app.controller("PackagesController", function ($scope, $rootScope, $http, $uibMo
         });
         modalInstance.result.then(function (return_array) {
             if (return_array[0]) {
-                $scope.packages.forEach(function(element, index) {
+                $scope.packages.forEach(function (element, index) {
                     if (element.package_name == return_array[1]) {
                         $scope.packages.splice(index, 1);
                     }
@@ -90,7 +90,7 @@ app.controller("ModalController", function ($scope, $rootScope, $http, $uibModal
             $scope.isCollapsed = false;
         });
     };
-    $scope.remove_dialog = function(package_name) {
+    $scope.remove_dialog = function (package_name) {
         var modalInstance = $uibModal.open({
             templateUrl: 'snippets/confirmation_dialog.html',
             controller: 'ConfirmationDialogController',
@@ -108,12 +108,12 @@ app.controller("ModalController", function ($scope, $rootScope, $http, $uibModal
     };
 });
 
-app.controller("ConfirmationDialogController", function($scope, $uibModalInstance, $http, package_name) {
+app.controller("ConfirmationDialogController", function ($scope, $uibModalInstance, $http, package_name) {
     $scope.package_name = package_name;
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $uibModalInstance.close(false);
     };
-    $scope.remove = function(package_name) {
+    $scope.remove = function (package_name) {
         console.log("Removing package '" + package_name + "'.");
         $http.post("/api/remove_package", {"package_name": package_name}).success(function (data) {
             if (data.status == "error") {
@@ -126,8 +126,13 @@ app.controller("ConfirmationDialogController", function($scope, $uibModalInstanc
     }
 });
 
-app.controller("AddPackageController", function ($scope, $http) {
+app.controller("AddPackageController", function ($scope, $http, $timeout) {
+    $scope.valid_package = false;
     $scope.add_package = function (package_name) {
+        if ($scope.valid_package != true) {
+            $scope.response = "Invalid package.";
+            return;
+        }
         $http.post("/api/add_package", {"package_name": package_name}).success(function (data) {
             if (data.status == "error") {
                 $scope.response = "Error while adding package: " + data.error_message;
@@ -135,6 +140,29 @@ app.controller("AddPackageController", function ($scope, $http) {
                 $scope.response = "Package '" + package_name + "' was successfully added."
             }
         });
+    };
+    $scope.change_handler = function (input) {
+        if ($scope.timeout != null) {
+            $timeout.cancel($scope.timeout);
+        }
+        if (!input) {
+            $scope.valid_package = false;
+            return;
+        }
+        $scope.timeout = $timeout(function () {
+            $http.jsonp("https://aur.archlinux.org/rpc/", {
+                params: {
+                    v: "5",
+                    type: "info",
+                    "arg[]": input,
+                    callback: "JSON_CALLBACK"
+                }
+            }).success(function (data) {
+                $scope.timeout = null;
+                $scope.valid_package = data.resultcount != 0;
+            });
+        }, 300);
+
     }
 });
 
@@ -153,7 +181,7 @@ app.controller("RegisterController", function ($scope, $http) {
     }
 });
 
-app.controller("LoginController", function($scope, $http, $location, $rootScope) {
+app.controller("LoginController", function ($scope, $http, $location, $rootScope) {
     $scope.login = function (username, pw) {
         $http.post("/api/login", {"username": username, "pw": pw}).success(function (data) {
             if (data.status == "error") {
@@ -166,4 +194,8 @@ app.controller("LoginController", function($scope, $http, $location, $rootScope)
             }
         });
     }
+});
+
+app.config(function ($httpProvider) {
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
 });

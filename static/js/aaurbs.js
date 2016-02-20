@@ -140,7 +140,8 @@ app.controller("AddPackageController", function ($scope, $http, $timeout) {
             if (data.status == "error") {
                 $scope.response = "Error while adding package: " + data.error_message;
             } else {
-                $scope.response = "Package '" + package_name + "' was successfully added."
+                $scope.response = "Package '" + package_name + "' was successfully added.";
+                $scope.package_name = "";
             }
         });
     };

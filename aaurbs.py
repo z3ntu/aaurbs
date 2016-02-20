@@ -27,6 +27,7 @@ def main():
     create_database(database)
     update_packages()
     save_database(database)
+    print("End of aaurbs.py")
 
 
 def create_database(conn):

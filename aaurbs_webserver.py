@@ -187,9 +187,11 @@ def main():
                               mimetype="application/json")
 
     # ACTUAL METHOD
+    ssl_context = ('server.crt', 'server.key')
     try:
         app.run(host='0.0.0.0',
                 port=8080,
+                ssl_context=ssl_context,
                 debug=config.debug)
     except OSError as err:
         print("[ERROR] " + err.strerror, file=sys.stderr)

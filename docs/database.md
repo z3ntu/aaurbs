@@ -3,7 +3,7 @@
 ### _Table `packages`_:
 __package_name__: name of the package
 
-__build_status__: build status (0=unbuilt, 1=successful, 2=unknown error, 3=error in check(), more reasons to come!)
+__build_status__: build status (0=unbuilt, 1=successful, 2=unknown error, 3=error in check(), 4=missing dependencies more reasons to come!)
 
 __package_version__: last known package version (0=unknown, other value=version)
 

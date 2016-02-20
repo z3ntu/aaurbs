@@ -29,6 +29,9 @@ app.controller("HeaderController", function ($scope, $rootScope, $location, $htt
             $location.path("/");
         });
     };
+    $rootScope.$on("$routeChangeError", function () {
+        console.log("failed to change routes");
+    });
 });
 
 app.controller("ProfileController", function ($scope, $rootScope, $http) {
@@ -43,7 +46,7 @@ app.controller("ProfileController", function ($scope, $rootScope, $http) {
 });
 
 app.controller("PackagesController", function ($scope, $rootScope, $http, $uibModal) {
-    $rootScope.reasons = ["Unknown", "Success", "Unknown error!", "A failure occurred in check()."];
+    $rootScope.reasons = ["Unknown", "Success", "Unknown error!", "A failure occurred in check().", "Missing dependencies."];
     $scope.sortField = 'package_name';
     $scope.reverse = false;
     $http.get("/api/get_packages").success(function (data) {
@@ -194,8 +197,4 @@ app.controller("LoginController", function ($scope, $http, $location, $rootScope
             }
         });
     }
-});
-
-app.config(function ($httpProvider) {
-    delete $httpProvider.defaults.headers.common['X-Requested-With'];
 });

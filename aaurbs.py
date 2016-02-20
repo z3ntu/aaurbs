@@ -97,16 +97,23 @@ def build_package(name, clean="c"):
     print("Building package '" + name + "'.")
     change_workdir(PACKAGES_PATH + "/" + name)
     try:
-        output = subprocess.check_output("PKGDEST='" + REPO_PATH + "' makepkg -sr"+clean+" --noconfirm --noprogressbar",
-                                         shell=True,
-                                         stderr=subprocess.STDOUT).decode("utf-8")
+        output = subprocess.check_output(
+            "PKGDEST='" + REPO_PATH + "' makepkg -sr" + clean + " --noconfirm --noprogressbar",
+            shell=True,
+            stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as e:  # non-zero exit code
         if b"ERROR: A package has already been built." in e.output:
             print("Warning: Package has already been built.")  # This is no error!
             return "1"
+        elif b"ERROR: The package group has already been built." in e.output:
+            print("Warning: The package group has already been built.")  # Same as above.
+            return "1"
         elif b"ERROR: A failure occurred in check()." in e.output:
             print("ERROR: A failure occurred in check().")
             error_status = "3"
+        elif b"ERROR: 'pacman' failed to install missing dependencies." in e.output:
+            print("ERROR: 'pacman' failed to install missing dependencies.")
+            error_status = "4"
         else:
             print(e.output)
             error_status = "2"

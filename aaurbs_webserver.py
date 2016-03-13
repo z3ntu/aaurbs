@@ -30,23 +30,28 @@ def main():
 
     @app.route('/api/register', methods=['POST'])
     def register():
-        # TODO: SQL injection proof (practically everywhere)
         username = flask.request.json.get('username')
+        if len(username) > 64:
+            return flask.Response("{\"status\": \"error\", \"error_message\": \"Please use a username shorter than 64 characters.\"}",
+                                  mimetype="application/json")
+        if len(flask.request.json.get("pw")) > 64:
+            return flask.Response("{\"status\": \"error\", \"error_message\": \"Please use a password shorter than 64 characters.\"}",
+                                  mimetype="application/json")
         passwordhash = generate_password_hash(flask.request.json.get('pw'))
         db = get_db()
-        userexists = len(db.execute("SELECT username FROM users WHERE username='" + username + "'").fetchall()) != 0
+        userexists = len(db.execute("SELECT username FROM users WHERE username=?", (username,)).fetchall()) != 0
         if userexists:
             return flask.Response("{\"status\": \"error\", \"error_message\": \"User already exists.\"}",
                                   mimetype="application/json")
         db.execute(
-            "INSERT INTO users (username, password_hash, user_role) VALUES ('" + username + "', '" + passwordhash + "', '1')")
+            "INSERT INTO users (username, password_hash, user_role) VALUES (?, ?, ?)", (username, passwordhash, 1))
         db.commit()
         return flask.Response("{\"status\": \"ok\"}", mimetype="application/json")
 
     @app.route('/api/login', methods=['POST'])
     def login():
         username = flask.request.json.get('username')
-        pass_hash = get_db().execute("SELECT password_hash FROM users WHERE username='" + username + "'").fetchone()
+        pass_hash = get_db().execute("SELECT password_hash FROM users WHERE username=?", (username,)).fetchone()
         if pass_hash is not None and check_password_hash(pass_hash[0], flask.request.json.get('pw')):
             user = User()
             user.id = username
@@ -110,7 +115,7 @@ def main():
         if package_name is None:
             return flask.Response("{\"status\": \"error\", \"error_message\": \"parameter package_name is missing\"}",
                                   mimetype="application/json")
-        package = get_db().execute("SELECT * FROM packages WHERE package_name='" + package_name + "'").fetchone()
+        package = get_db().execute("SELECT * FROM packages WHERE package_name=?", (package_name,)).fetchone()
         if package is None:
             return flask.Response("{\"status\": \"error\", \"error_message\": \"package not found\"}",
                                   mimetype="application/json")
@@ -136,21 +141,10 @@ def main():
             except UnicodeDecodeError as e:
                 return flask.Response("Error while reading the log file: " + str(e), mimetype="text/plain")
 
-                # @app.route('/api/get_file_url')
-                # def get_file_url():
-                #     package_name = flask.request.args.get("package_name")
-                #     if package_name is None or version is None:
-                #         return flask.Response("{\"status\": \"error\", \"error_message\": \"parameter package_name or package_version is missing\"}", mimetype="application/json")
-                #     for file in os.listdir(REPO_PATH):
-                #         if file.endswith(".pkg.tar.xz") and file.startswith(package_name + "-" + version):
-                #             return flask.send_file(REPO_PATH + "/" + file, as_attachment=True, attachment_filename=file)
-                # return flask.Response("{\"status\": \"ok\", \"download_url\": \""+file+"\"}", mimetype="application/json")
-                # return flask.Response("{\"status\": \"error\", \"error_message\": \"no file found\"}", mimetype="application/json")
-
     @app.route('/api/download_file/<package_name>')
     def download_file(package_name):
         package_version = get_db().execute(
-            "SELECT package_version FROM packages WHERE package_name='" + package_name + "'").fetchone()
+            "SELECT package_version FROM packages WHERE package_name=?", (package_name,)).fetchone()
         if package_version is None:
             return flask.Response("Package not found.", mimetype="text/plain")
         package_version = package_version[0]
@@ -166,7 +160,7 @@ def main():
     @login_manager.user_loader  # should create user object (get from database etc)
     def user_loader(username):
         print("=== user_loader ===")
-        userdb = get_db().execute("SELECT * FROM users WHERE username='" + username + "'")
+        userdb = get_db().execute("SELECT * FROM users WHERE username=?", (username,))
         if userdb is None:
             return
 

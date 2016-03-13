@@ -8,6 +8,7 @@ import subprocess
 import shutil
 import re
 import config
+import pkgbuild
 from time import strftime, gmtime
 
 AUR_BASE_PATH = config.base_path
@@ -32,15 +33,13 @@ def main():
 
 def create_database(conn):
     print("Creating database (if not exists).")
-    conn.execute("""
+    conn.executescript("""
         CREATE TABLE IF NOT EXISTS packages (
             package_name VARCHAR(100),
             build_status VARCHAR(2),
             package_version VARCHAR(50),
             PRIMARY KEY (package_name)
         );
-    """)
-    conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username VARCHAR(100),
             password_hash VARCHAR(100),
@@ -70,8 +69,7 @@ def add_package(name, db):
             print("Package does not exist!")
             return False, "Package does not exist!"
         else:
-            db.execute(
-                "INSERT INTO packages (package_name, build_status, package_version) VALUES ('" + name + "', '0', '0');")
+            db.execute("INSERT INTO packages (package_name, build_status, package_version) VALUES (?, ?, ?)", (name, 0, 0))
             db.commit()
             print("Package successfully added.")
             os.makedirs(LOG_PATH + "/" + name, exist_ok=True)
@@ -85,7 +83,7 @@ def remove_package(name, db):
     if os.path.isdir(PACKAGES_PATH + "/" + name) and os.path.isdir(LOG_PATH + "/" + name):
         shutil.rmtree(PACKAGES_PATH + "/" + name)
         shutil.rmtree(LOG_PATH + "/" + name)
-        db.execute("DELETE FROM packages WHERE package_name='" + name + "'")
+        db.execute("DELETE FROM packages WHERE package_name=?", (name,))
         db.commit()
         print("Removed package '" + name + "'")
         return True
@@ -120,7 +118,7 @@ def build_package(name, clean="c"):
             error_status = "2"
         log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log",
                     e.output.decode("utf-8"))
-        database.execute("UPDATE packages SET build_status=" + error_status + " WHERE package_name='" + name + "'")
+        database.execute("UPDATE packages SET build_status=? WHERE package_name=?", (error_status, name))
         return error_status
     change_workdir(PACKAGES_PATH)
     # save output into logfile
@@ -130,13 +128,13 @@ def build_package(name, clean="c"):
 
     for file in os.listdir(REPO_PATH):
         if name in file:
-            version = re.search(name + '-(.+?)-(x86_64|i686|any).pkg.tar.xz', file).group(1)
+            version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file).group(1)
             if new_version != version:  # skip old packages
                 continue
             print("VERSION: " + version)
             print(file)
             database.execute(
-                "UPDATE packages SET build_status=1, package_version='" + version + "' WHERE package_name='" + name + "'")
+                "UPDATE packages SET build_status=1, package_version=? WHERE package_name=?", (version, name))
             add_to_repo(REPO_PATH + "/" + file)
             return "1"
 
@@ -152,19 +150,42 @@ def add_to_repo(filename):
 
 def update_packages():
     for package in os.listdir(PACKAGES_PATH):
-        change_workdir(PACKAGES_PATH + "/" + package)
-        output = subprocess.check_output("git pull",
+        # print(os.getcwd())
+        change_workdir(PACKAGES_PATH)
+        output = subprocess.check_output("git -C " + package + " pull",
                                          shell=True,
                                          stderr=subprocess.STDOUT).decode("utf-8")
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
-            build_package(package, clean="")
-        elif database.execute("SELECT build_status FROM packages WHERE package_name='" + package + "'").fetchone()[
+            check_vcs(package)
+        elif database.execute("SELECT build_status FROM packages WHERE package_name=?", (package,)).fetchone()[
             0] != "1":  # package status is not successful
             build_package(package)
         else:
             print("Package '" + package + "' is already up-to-date.")
+
+
+def check_vcs(package):
+    srcinfo = pkgbuild.SRCINFO(package + "/.SRCINFO").content
+    folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.folder)
+    url_folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.url).rsplit('/', 1)[-1].replace(".git", "")
+    if folder is None:
+        folder = url_folder
+    if not os.path.isdir(package + "/src") or not os.path.isdir(package + "/" + folder):
+        print("Building VCS package the first time.")
+        build_package(package, clean="")
+    elif re.search('-git', package):
+        output = subprocess.check_output("git -C " + package + " --git-dir=" + folder + " --work-tree=src/" + folder + " pull origin master",
+                                         shell=True,
+                                         stderr=subprocess.STDOUT).decode("utf-8")
+        if "Already up-to-date.\n" not in output:
+            print("Updating package '"+package+"'.")
+            build_package(package, clean="")
+        else:
+            print("Package '"+package+"' is already up-to-date.")
+    else:
+        build_package(package, clean="")  # other vcs sources
 
 
 def set_user(name):

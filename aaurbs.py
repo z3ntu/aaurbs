@@ -175,6 +175,7 @@ def check_vcs(package):
     if type(srcinfo.get("source")) is not str:  # TODO: Handle multiple source attributes
         print("(Probably) multiple source attributes.")
         build_package(package, clean="")
+        return
     url_folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.url).rsplit('/', 1)[-1].replace(".git", "")
     if folder is None:
         folder = url_folder

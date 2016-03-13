@@ -113,6 +113,9 @@ def build_package(name, clean="c"):
         elif b"ERROR: 'pacman' failed to install missing dependencies." in e.output:
             print("ERROR: 'pacman' failed to install missing dependencies.")
             error_status = "4"
+        elif b"ERROR: One or more files did not pass the validity check!" in e.output:
+            print("ERROR: One or more files did not pass the validity check!")
+            error_status = "5"
         else:
             print(e.output)
             error_status = "2"
@@ -169,6 +172,9 @@ def update_packages():
 def check_vcs(package):
     srcinfo = pkgbuild.SRCINFO(package + "/.SRCINFO").content
     folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.folder)
+    if type(srcinfo.get("source")) is not str:  # TODO: Handle multiple source attributes
+        print("(Probably) multiple source attributes.")
+        build_package(package, clean="")
     url_folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.url).rsplit('/', 1)[-1].replace(".git", "")
     if folder is None:
         folder = url_folder

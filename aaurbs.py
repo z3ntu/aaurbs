@@ -69,7 +69,8 @@ def add_package(name, db):
             print("Package does not exist!")
             return False, "Package does not exist!"
         else:
-            db.execute("INSERT INTO packages (package_name, build_status, package_version) VALUES (?, ?, ?)", (name, 0, 0))
+            db.execute("INSERT INTO packages (package_name, build_status, package_version) VALUES (?, ?, ?)",
+                       (name, 0, 0))
             db.commit()
             print("Package successfully added.")
             os.makedirs(LOG_PATH + "/" + name, exist_ok=True)
@@ -153,11 +154,16 @@ def add_to_repo(filename):
 
 def update_packages():
     for package in os.listdir(PACKAGES_PATH):
-        # print(os.getcwd())
+        print(os.getcwd())
         change_workdir(PACKAGES_PATH)
-        output = subprocess.check_output("git -C " + package + " pull",
-                                         shell=True,
-                                         stderr=subprocess.STDOUT).decode("utf-8")
+        try:
+            output = subprocess.check_output("git -C " + package + " pull",
+                                             shell=True,
+                                             stderr=subprocess.STDOUT).decode("utf-8")
+        except subprocess.CalledProcessError as e:
+            print(e)
+            print(e.output.decode('utf-8'))
+            continue
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
@@ -176,21 +182,29 @@ def check_vcs(package):
         print("(Probably) multiple source attributes.")
         build_package(package, clean="")
         return
-    url_folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.url).rsplit('/', 1)[-1].replace(".git", "")
+    url_folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.url).rsplit('/', 1)[
+        -1].replace(".git", "")
     if folder is None:
         folder = url_folder
     if not os.path.isdir(package + "/src") or not os.path.isdir(package + "/" + folder):
         print("Building VCS package the first time.")
         build_package(package, clean="")
     elif re.search('-git', package):
-        output = subprocess.check_output("git -C " + package + " --git-dir=" + folder + " --work-tree=src/" + folder + " pull origin master",
-                                         shell=True,
-                                         stderr=subprocess.STDOUT).decode("utf-8")
-        if "Already up-to-date.\n" not in output:
-            print("Updating package '"+package+"'.")
+        try:
+            output = subprocess.check_output(
+                "git -C " + package + " --git-dir=" + folder + " --work-tree=src/" + folder + " pull origin master",
+                shell=True,
+                stderr=subprocess.STDOUT).decode("utf-8")
+        except subprocess.CalledProcessError as e:
+            print("ERROR WHILE UPDATING!")
+            print(e)
+            print(e.output.decode('utf-8'))
+            return
+        if "Already up-to-date." not in output:
+            print("Updating package '" + package + "'.")
             build_package(package, clean="")
         else:
-            print("Package '"+package+"' is already up-to-date.")
+            print("Package '" + package + "' is already up-to-date.")
     else:
         build_package(package, clean="")  # other vcs sources
 

@@ -154,7 +154,6 @@ def add_to_repo(filename):
 
 def update_packages():
     for package in os.listdir(PACKAGES_PATH):
-        print(os.getcwd())
         change_workdir(PACKAGES_PATH)
         try:
             output = subprocess.check_output("git -C " + package + " pull",
@@ -204,7 +203,7 @@ def check_vcs(package):
             print("Updating package '" + package + "'.")
             build_package(package, clean="")
         else:
-            print("Package '" + package + "' is already up-to-date.")
+            print("-git package '" + package + "' is already up-to-date.")
     else:
         build_package(package, clean="")  # other vcs sources
 

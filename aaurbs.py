@@ -18,6 +18,8 @@ LOG_PATH = AUR_BASE_PATH + "/logs"
 REPO_PATH = config.repo_path
 REPO_FILE = REPO_PATH + "/" + config.repo_name + ".db.tar.gz"
 
+database = None
+
 
 def main():
     global database
@@ -195,7 +197,11 @@ def check_vcs(package):
                 shell=True,
                 stderr=subprocess.STDOUT).decode("utf-8")
         except subprocess.CalledProcessError as e:
-            print("ERROR WHILE UPDATING!")
+            database.execute("UPDATE packages SET build_status=? WHERE package_name=?", (2, package))
+            database.commit()
+            print("ERROR WHILE UPDATING, some file probably got changed and I have no idea how to fix this! (running 'git reset --hard') - building normally to see if it works!")
+            if "Please, commit your changes or stash them before you can merge." in e.output.decode('utf-8'):
+                build_package(package, clean="")
             print(e)
             print(e.output.decode('utf-8'))
             return

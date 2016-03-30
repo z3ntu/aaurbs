@@ -167,11 +167,14 @@ def update_packages():
             continue
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
+        elif database.execute("SELECT build_status FROM packages WHERE package_name=?", (package,)).fetchone()[
+                0] != "1":  # package status is not successful
+            if re.search('-(bzr|git|hg|svn)', package):
+                build_package(package, clean="")
+            else:
+                build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
             check_vcs(package)
-        elif database.execute("SELECT build_status FROM packages WHERE package_name=?", (package,)).fetchone()[
-            0] != "1":  # package status is not successful
-            build_package(package)
         else:
             print("Package '" + package + "' is already up-to-date.")
 
@@ -199,7 +202,8 @@ def check_vcs(package):
         except subprocess.CalledProcessError as e:
             database.execute("UPDATE packages SET build_status=? WHERE package_name=?", (2, package))
             database.commit()
-            print("ERROR WHILE UPDATING, some file probably got changed and I have no idea how to fix this! (running 'git reset --hard') - building normally to see if it works!")
+            print("ERROR WHILE UPDATING, some file probably got changed and I have no idea how to fix this!")
+            print("not right now (running 'git reset --hard') - but building normally to see if it works!")
             if "Please, commit your changes or stash them before you can merge." in e.output.decode('utf-8'):
                 build_package(package, clean="")
             print(e)

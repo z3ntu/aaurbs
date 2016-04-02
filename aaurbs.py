@@ -213,6 +213,7 @@ def check_vcs(package):
             print("Updating package '" + package + "'.")
             build_package(package, clean="")
         else:
+            print(output)
             print("-git package '" + package + "' is already up-to-date.")
     else:
         build_package(package, clean="")  # other vcs sources

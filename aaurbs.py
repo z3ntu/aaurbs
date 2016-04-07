@@ -176,8 +176,8 @@ def update_packages():
                 build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
             check_vcs(package)
-        else:
-            print("Package '" + package + "' is already up-to-date.")
+        # else:
+        #    print("Package '" + package + "' is already up-to-date.")
 
 
 def check_vcs(package):

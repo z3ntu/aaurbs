@@ -141,6 +141,7 @@ def build_package(name, clean="c"):
             print(file)
             database.execute(
                 "UPDATE packages SET build_status=1, package_version=? WHERE package_name=?", (version, name))
+            database.commit()
             add_to_repo(REPO_PATH + "/" + file)
             return "1"
 

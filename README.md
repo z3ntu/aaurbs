@@ -18,3 +18,4 @@ _Note, that `db-name` has to match the filename (`db-name.db.tar.gz`) in `update
 - [Python 3](https://www.python.org/)
 - [Flask](http://flask.pocoo.org/)
 - [Flask-login](https://github.com/maxcountryman/flask-login)
+- `xdelta3` from the official repository.

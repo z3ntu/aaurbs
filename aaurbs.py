@@ -149,7 +149,7 @@ def build_package(name, clean="c"):
 def add_to_repo(filename):
     print("Adding " + filename + " to database.")
     # the --remove parameter automatically removes old files!! :)
-    output = subprocess.check_output("repo-add --remove " + REPO_FILE + " " + filename,
+    output = subprocess.check_output("repo-add --remove --delta " + REPO_FILE + " " + filename,
                                      shell=True,
                                      stderr=subprocess.STDOUT).decode("utf-8")
     log_to_file(LOG_PATH + "/repo-add.log", output, mode="a")

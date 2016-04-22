@@ -138,27 +138,37 @@ def build_package(name, clean="c", srcinfo=None):
     # save output into logfile
     log_to_file(LOG_PATH + "/" + name + "/" + strftime("%Y-%m-%d_%H:%M:%S", gmtime()) + ".log", output)
 
+    found = False
     new_version = re.search('Finished making: ' + name + ' (.+?) \(', output).group(1)
 
-    for file in os.listdir(REPO_PATH):
-        if name in file:
-            version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file).group(1)
-            if new_version != version:  # skip old packages
-                continue
-            print("VERSION: " + version)
-            database.execute(
-                "UPDATE packages SET build_status=1, package_version=? WHERE package_name=?", (version, name))
-            database.commit()
-            if type(srcinfo.get("pkgname")) is list:
-                print("Split package!")
-                for file_inner in os.listdir(REPO_PATH):
-                    for pkgnamemember in srcinfo.get("pkgname"):
-                        if pkgnamemember in file_inner:
-                            print(file_inner)
-                            add_to_repo(REPO_PATH + "/" + file_inner)
-            else:
+    if type(srcinfo.get("pkgname")) is list:
+        print("Split package!")
+        for file in os.listdir(REPO_PATH):
+            for pkgnamemember in srcinfo.get("pkgname"):
+                if pkgnamemember in file:
+                    version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz',
+                                        file).group(1)
+                    if new_version != version:  # skip old packages
+                        continue
+                    print("VERSION: " + version)
+                    print(file)
+                    add_to_repo(REPO_PATH + "/" + file)
+                    found = True
+    else:
+        for file in os.listdir(REPO_PATH):
+            if name in file:
+                version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file).group(1)
+                if new_version != version:  # skip old packages
+                    continue
+                print("VERSION: " + version)
                 add_to_repo(REPO_PATH + "/" + file)
-            return "1"
+                found = True
+    if found:
+        database.execute(
+            "UPDATE packages SET build_status=1, package_version=? WHERE package_name=?", (version, name))
+        database.commit()
+        return "1"
+    return "2"
 
 
 def add_to_repo(filename):

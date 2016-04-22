@@ -146,7 +146,7 @@ def build_package(name, clean="c", srcinfo=None):
         for file in os.listdir(REPO_PATH):
             for pkgnamemember in srcinfo.get("pkgname"):
                 if pkgnamemember in file:
-                    version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz',
+                    version = re.search(pkgnamemember + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz',
                                         file).group(1)
                     if new_version != version:  # skip old packages
                         continue
@@ -229,7 +229,7 @@ def check_vcs(package):
             output = subprocess.check_output(
                 "git -C " + package + " --git-dir=" + folder + " --work-tree=src/" + folder + " pull origin master",
                 shell=True,
-                stderr=subprocess.STDOUT).decode("utf-8")
+                stderr=subprocess.STDOUT).decode("utf-8")  # TODO: Pull correct branch and fix everything
         except subprocess.CalledProcessError as e:
             database.execute("UPDATE packages SET build_status=? WHERE package_name=?", (2, package))
             database.commit()

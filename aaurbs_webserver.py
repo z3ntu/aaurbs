@@ -183,8 +183,8 @@ def main():
     # ACTUAL METHOD
     ssl_context = ('server.crt', 'server.key')
     try:
-        app.run(host='0.0.0.0',
-                port=8080,
+        app.run(host=config.host,
+                port=config.port,
                 ssl_context=ssl_context,
                 debug=config.debug)
     except OSError as err:

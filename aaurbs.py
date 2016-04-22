@@ -19,11 +19,17 @@ REPO_PATH = config.repo_path
 REPO_FILE = REPO_PATH + "/" + config.repo_name + ".db.tar.gz"
 
 database = None
+delta = ""
 
 
 def main():
     global database
     database = sqlite3.connect(AUR_BASE_PATH + "/aaurbs.db")
+    global delta
+    if config.delta:
+        delta = "--delta"
+    else:
+        delta = ""
     change_workdir(PACKAGES_PATH)
     # set_user(config.aur_user)
     create_directories()
@@ -95,9 +101,11 @@ def remove_package(name, db):
         return False
 
 
-def build_package(name, clean="c"):
+def build_package(name, clean="c", srcinfo=None):
     print("Building package '" + name + "'.")
     change_workdir(PACKAGES_PATH + "/" + name)
+    if srcinfo is None:
+        srcinfo = pkgbuild.SRCINFO(".SRCINFO").content
     try:
         output = subprocess.check_output(
             "PKGDEST='" + REPO_PATH + "' makepkg -sr" + clean + " --noconfirm --noprogressbar",
@@ -106,10 +114,10 @@ def build_package(name, clean="c"):
     except subprocess.CalledProcessError as e:  # non-zero exit code
         if b"ERROR: A package has already been built." in e.output:
             print("Warning: Package has already been built.")  # This is no error!
-            return "1"
+            error_status = "1"
         elif b"ERROR: The package group has already been built." in e.output:
             print("Warning: The package group has already been built.")  # Same as above.
-            return "1"
+            error_status = "1"
         elif b"ERROR: A failure occurred in check()." in e.output:
             print("ERROR: A failure occurred in check().")
             error_status = "3"
@@ -138,20 +146,32 @@ def build_package(name, clean="c"):
             if new_version != version:  # skip old packages
                 continue
             print("VERSION: " + version)
-            print(file)
             database.execute(
                 "UPDATE packages SET build_status=1, package_version=? WHERE package_name=?", (version, name))
             database.commit()
-            add_to_repo(REPO_PATH + "/" + file)
+            if type(srcinfo.get("pkgname")) is list:
+                print("Split package!")
+                for file_inner in os.listdir(REPO_PATH):
+                    for pkgnamemember in srcinfo.get("pkgname"):
+                        if pkgnamemember in file_inner:
+                            print(file_inner)
+                            add_to_repo(REPO_PATH + "/" + file_inner)
+            else:
+                add_to_repo(REPO_PATH + "/" + file)
             return "1"
 
 
 def add_to_repo(filename):
     print("Adding " + filename + " to database.")
     # the --remove parameter automatically removes old files!! :)
-    output = subprocess.check_output("repo-add --remove --delta " + REPO_FILE + " " + filename,
-                                     shell=True,
-                                     stderr=subprocess.STDOUT).decode("utf-8")
+    try:
+        output = subprocess.check_output("repo-add --remove " + delta + " " + REPO_FILE + " " + filename,
+                                         shell=True,
+                                         stderr=subprocess.STDOUT).decode("utf-8")
+    except subprocess.CalledProcessError as e:
+        print(e)
+        output = e.output.decode('utf-8')
+        print(e.output.decode('utf-8'))
     log_to_file(LOG_PATH + "/repo-add.log", output, mode="a")
 
 
@@ -169,15 +189,15 @@ def update_packages():
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
         elif database.execute("SELECT build_status FROM packages WHERE package_name=?", (package,)).fetchone()[
-                0] != "1":  # package status is not successful
+            0] != "1":  # package status is not successful
             if re.search('-(bzr|git|hg|svn)', package):
                 build_package(package, clean="")
             else:
                 build_package(package)
         elif re.search('-(bzr|git|hg|svn)', package):  # vcs packages
             check_vcs(package)
-        # else:
-        #    print("Package '" + package + "' is already up-to-date.")
+            # else:
+            #    print("Package '" + package + "' is already up-to-date.")
 
 
 def check_vcs(package):
@@ -185,7 +205,7 @@ def check_vcs(package):
     folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.folder)
     if type(srcinfo.get("source")) is not str:  # TODO: Handle multiple source attributes
         print("(Probably) multiple source attributes.")
-        build_package(package, clean="")
+        build_package(package, clean="", srcinfo=srcinfo)
         return
     url_folder = pkgbuild.parse_source_field(srcinfo.get("source"), pkgbuild.SourceParts.url).rsplit('/', 1)[
         -1].replace(".git", "")
@@ -193,7 +213,7 @@ def check_vcs(package):
         folder = url_folder
     if not os.path.isdir(package + "/src") or not os.path.isdir(package + "/" + folder):
         print("Building VCS package the first time.")
-        build_package(package, clean="")
+        build_package(package, clean="", srcinfo=srcinfo)
     elif re.search('-git', package):
         try:
             output = subprocess.check_output(
@@ -206,18 +226,18 @@ def check_vcs(package):
             print("ERROR WHILE UPDATING, some file probably got changed and I have no idea how to fix this!")
             print("not right now (running 'git reset --hard') - but building normally to see if it works!")
             if "Please, commit your changes or stash them before you can merge." in e.output.decode('utf-8'):
-                build_package(package, clean="")
+                build_package(package, clean="", srcinfo=srcinfo)
             print(e)
             print(e.output.decode('utf-8'))
             return
         if "Already up-to-date." not in output:
             print("Updating package '" + package + "'.")
-            build_package(package, clean="")
+            build_package(package, clean="", srcinfo=srcinfo)
         else:
             print(output)
             print("-git package '" + package + "' is already up-to-date.")
     else:
-        build_package(package, clean="")  # other vcs sources
+        build_package(package, clean="", srcinfo=srcinfo)  # other vcs sources
 
 
 def set_user(name):

@@ -127,6 +127,9 @@ def build_package(name, clean="c", srcinfo=None):
         elif b"ERROR: One or more files did not pass the validity check!" in e.output:
             print("ERROR: One or more files did not pass the validity check!")
             error_status = "5"
+        elif b"ERROR: One or more PGP signatures could not be verified!" in e.output:
+            print("ERROR: One or more PGP signatures could not be verified!")
+            error_status = "6"
         else:
             print(e.output)
             error_status = "2"

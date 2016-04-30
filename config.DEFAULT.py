@@ -4,7 +4,7 @@
 #     os.urandom(24)
 # KEEP IT SECRET!
 secret_key = b'paste-here'
-# Name of the repository (has to be in client conf)
+# Name of the repository (has to be in the client conf)
 repo_name = "repo"
 # Public accessible (eg by webserver) path
 repo_path = "/srv/http/archlinux"

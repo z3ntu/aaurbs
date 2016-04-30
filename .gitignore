@@ -9,3 +9,6 @@ server.key
 
 # Python stuff
 __pycache__/
+
+# bower components
+static/bower_components/

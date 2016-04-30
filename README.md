@@ -5,7 +5,7 @@ aaurbs is designed to automatically build AUR packages and add them to a pacman-
 ## Setup:
 - User `aur` which has a no-password sudo access for pacman (`aur ALL=(ALL) NOPASSWD: /usr/bin/pacman`).
 - Folder `/aur/` for the the packages & logs, owned by user `aur`.
-- Apache/httpd folder `/srv/http/archlinux/` where all built packages and the repo file are stored, owned by user `aur`.
+- Apache/httpd folder `/srv/http/archlinux/` where all built packages and the repo files are stored, owned by user `aur`.
 - On the "client" an entry in `/etc/pacman.conf` with:
 ```
 [db-name]
@@ -13,6 +13,7 @@ SigLevel = Never
 Server = http://<server-ip-address>/archlinux
 ```
 _Note, that `db-name` has to match `repo_name` in `config.py`!
+- Execute `bower install` in the `static` directory to install all bower components!
 
 ## Requirements
 - [Python 3](https://www.python.org/)
@@ -25,7 +26,7 @@ pacman -S python python-flask python-flask-login # and maybe xdelta3
 ```
 
 ## Start
-- Modify `aaurbs.service` & `aaurbs_webserver.service` to your location.
+- Modify `aaurbs.service` & `aaurbs_webserver.service` to match your location of the application.
 - Copy/symlink `aaurbs.service`, `aaurbs.timer` and `aaurbs_webserver.service` to `/etc/systemd/system/`
 - To start `aaurbs` manually: `systemctl start aaurbs.service`
 - To autostart `aaurbs` every hour (persists after reboot): `systemctl enable --now aaurbs.timer`

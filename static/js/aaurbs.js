@@ -46,7 +46,7 @@ app.controller("ProfileController", function ($scope, $rootScope, $http) {
 });
 
 app.controller("PackagesController", function ($scope, $rootScope, $http, $uibModal) {
-    $rootScope.reasons = ["Unknown", "Success", "Unknown error!", "A failure occurred in check().", "Missing dependencies.", "Validity check failed."];
+    $rootScope.reasons = ["Unknown", "Success", "Unknown error!", "A failure occurred in check().", "Missing dependencies.", "Validity check failed.", "PGP signature verification failed."];
     $scope.sortField = 'package_name';
     $scope.reverse = false;
     $http.get("/api/get_packages").success(function (data) {

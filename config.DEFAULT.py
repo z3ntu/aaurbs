@@ -20,3 +20,5 @@ port = 8080
 host = '0.0.0.0'
 # If flask should be started in debug mode
 debug = False
+# Should the webserver be secured with ssl? If yes, there has to be a server.crt & server.key file.
+use_ssl = True

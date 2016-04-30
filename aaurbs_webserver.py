@@ -180,8 +180,11 @@ def main():
         return flask.Response("{\"status\": \"error\", \"error_message\": \"Not authorized.\"}",
                               mimetype="application/json")
 
-    # ACTUAL METHOD
-    ssl_context = ('server.crt', 'server.key')
+    if config.use_ssl:
+        ssl_context = ('server.crt', 'server.key')
+    else:
+        ssl_context = None
+
     try:
         app.run(host=config.host,
                 port=config.port,

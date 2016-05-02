@@ -230,9 +230,9 @@ def check_vcs(package):
     elif re.search('-git', package):
         try:
             output = subprocess.check_output(
-                "git -C " + package + " --git-dir=" + folder + " --work-tree=src/" + folder + " pull origin master",
+                "git -C " + package + "/src/" + folder + " fetch",
                 shell=True,
-                stderr=subprocess.STDOUT).decode("utf-8")  # TODO: Pull correct branch and fix everything
+                stderr=subprocess.STDOUT).decode("utf-8")  # TODO: Test if this actually works.
         except subprocess.CalledProcessError as e:
             database.execute("UPDATE packages SET build_status=? WHERE package_name=?", (2, package))
             database.commit()
@@ -243,7 +243,7 @@ def check_vcs(package):
             print(e)
             print(e.output.decode('utf-8'))
             return
-        if "Already up-to-date." not in output:
+        if output != "":
             print("Updating package '" + package + "'.")
             build_package(package, clean="", srcinfo=srcinfo)
         else:

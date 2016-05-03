@@ -200,8 +200,9 @@ def update_packages():
                 print(os.getcwd())
                 change_workdir(PACKAGES_PATH)
                 try:
+                    print("Resetting the root package dir!")
                     subprocess.check_output("git -C " + package + " fetch --all", shell=True)
-                    subprocess.check_output("git -C " + package + "/ reset --hard origin/master", shell=True)
+                    subprocess.check_output("git -C " + package + " reset --hard origin/master", shell=True)
                     output = "Succesfully pulled!"
                 except Exception as ex:
                     print(ex)

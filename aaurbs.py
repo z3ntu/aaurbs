@@ -197,12 +197,19 @@ def update_packages():
                                              stderr=subprocess.STDOUT).decode("utf-8")
         except subprocess.CalledProcessError as e:
             if "error: Your local changes to the following files would be overwritten by merge" in e.output.decode('utf-8'):
-                subprocess.call("git -C " + package + " fetch --all")
-                subprocess.call("git -C " + package + " reset --hard origin/master")
+                print(os.getcwd())
+                change_workdir(PACKAGES_PATH)
+                try:
+                    subprocess.check_output("git -C " + package + " fetch --all", shell=True)
+                    subprocess.check_output("git -C " + package + "/ reset --hard origin/master", shell=True)
+                    output = "Succesfully pulled!"
+                except Exception as ex:
+                    print(ex)
+                    continue
             else:
                 print(e)
                 print(e.output.decode('utf-8'))
-            continue
+                continue
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
         elif database.execute("SELECT build_status FROM packages WHERE package_name=?", (package,)).fetchone()[

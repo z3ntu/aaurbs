@@ -196,8 +196,12 @@ def update_packages():
                                              shell=True,
                                              stderr=subprocess.STDOUT).decode("utf-8")
         except subprocess.CalledProcessError as e:
-            print(e)
-            print(e.output.decode('utf-8'))
+            if "error: Your local changes to the following files would be overwritten by merge" in e.output.decode('utf-8'):
+                subprocess.call("git -C " + package + " fetch --all")
+                subprocess.call("git -C " + package + " reset --hard origin/master")
+            else:
+                print(e)
+                print(e.output.decode('utf-8'))
             continue
         if output != "Already up-to-date.\n":  # new version
             build_package(package)

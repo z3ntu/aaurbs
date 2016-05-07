@@ -14,16 +14,20 @@ app.controller("CatchAllCtrl", function ($scope, $routeParams) {
 });
 
 app.controller("HeaderController", function ($scope, $rootScope, $location, $http) {
+    $rootScope.update_user_data = function() {
+        $http.get("/api/get_user_info").success(function (data) {
+            $rootScope.loggedin = data.status != "error";
+            $rootScope.user = data;
+        });
+    };
     $scope.navCollapsed = true;
     $scope.isActive = function (viewLocation) {
         return viewLocation === $location.path();
     };
-    $http.get("/api/get_user_info").success(function (data) {
-        $rootScope.loggedin = data.status != "error";
-        $rootScope.user = data;
-    });
+    $rootScope.update_user_data();
+
     $scope.logout = function () {
-        $http.post("/api/logout", null).success(function (data) {
+        $http.post("/api/logout", null).success(function () {
             $rootScope.loggedin = false;
             $rootScope.user = null;
             $location.path("/");
@@ -192,8 +196,7 @@ app.controller("LoginController", function ($scope, $http, $location, $rootScope
                 $scope.response = "Error while logging in: " + data.error_message;
             } else {
                 $scope.response = "You were successfully logged in.";
-                $rootScope.loggedin = true;
-                $rootScope.user = data;
+                $rootScope.update_user_data(); // set $rootScope.user to the user object
                 $location.path("profile"); // redirect to profile
             }
         });

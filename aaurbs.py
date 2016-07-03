@@ -14,6 +14,7 @@ from time import strftime, gmtime
 AUR_BASE_PATH = config.base_path
 PACKAGES_PATH = AUR_BASE_PATH + "/packages"
 LOG_PATH = AUR_BASE_PATH + "/logs"
+CHROOT_PATH = AUR_BASE_PATH + "/chroot"
 
 REPO_PATH = config.repo_path
 REPO_FILE = REPO_PATH + "/" + config.repo_name + ".db.tar.gz"
@@ -33,6 +34,10 @@ def main():
     change_workdir(PACKAGES_PATH)
     # set_user(config.aur_user)
     create_directories()
+    if not os.path.exists(CHROOT_PATH + "/root"):
+        subprocess.check_call("mkarchroot " + CHROOT_PATH + "/root base-devel", shell=True)
+    else:
+        subprocess.check_call("arch-nspawn " + CHROOT_PATH + "/root pacman -Syu --noconfirm", shell=True)
     create_database(database)
     update_packages()
     save_database(database)
@@ -94,6 +99,7 @@ def remove_package(name, db):
         shutil.rmtree(LOG_PATH + "/" + name)
         db.execute("DELETE FROM packages WHERE package_name=?", (name,))
         db.commit()
+        subprocess.check_output("repo-remove " + REPO_FILE + " " + name)
         print("Removed package '" + name + "'")
         return True
     else:
@@ -101,16 +107,18 @@ def remove_package(name, db):
         return False
 
 
-def build_package(name, clean="c", srcinfo=None):
+def build_package(name, clean="-c", srcinfo=None):
     print("Building package '" + name + "'.")
     change_workdir(PACKAGES_PATH + "/" + name)
     if srcinfo is None:
         srcinfo = pkgbuild.SRCINFO(".SRCINFO").content
     try:
-        output = subprocess.check_output(
-            "PKGDEST='" + REPO_PATH + "' makepkg -sr" + clean + " --noconfirm --noprogressbar",
-            shell=True,
-            stderr=subprocess.STDOUT).decode("utf-8")
+        output = subprocess.check_output("makechrootpkg -c -r " + CHROOT_PATH + " -- #extra-args ", shell=True,
+                                         stderr=subprocess.STDOUT).decode("utf-8")
+        # output = subprocess.check_output(
+        #     "PKGDEST='" + REPO_PATH + "' makepkg -sr" + clean + " --noconfirm --noprogressbar",
+        #     shell=True,
+        #     stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as e:  # non-zero exit code
         if b"ERROR: A package has already been built." in e.output:
             print("Warning: Package has already been built.")  # This is no error!
@@ -146,24 +154,43 @@ def build_package(name, clean="c", srcinfo=None):
 
     if type(srcinfo.get("pkgname")) is list:
         print("Split package!")
-        for file in os.listdir(REPO_PATH):
+        for file in os.listdir(PACKAGES_PATH + "/" + name):
             for pkgnamemember in srcinfo.get("pkgname"):
                 if pkgnamemember in file:
+                    # SAME AS BELOW
                     version = re.search(pkgnamemember + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz',
-                                        file).group(1)
+                                        file)
+                    if version is not None:
+                        version = version.group(1)
+                    else:
+                        continue
                     if new_version != version:  # skip old packages
                         continue
                     print("VERSION: " + version)
                     print(file)
+                    if os.path.exists(REPO_PATH + "/" + file):
+                        continue
+                    shutil.move(PACKAGES_PATH + "/" + name + "/" + file, REPO_PATH)
+                    os.symlink(REPO_PATH + "/" + file, PACKAGES_PATH + "/" + name + "/" + file)
                     add_to_repo(REPO_PATH + "/" + file)
                     found = True
     else:
-        for file in os.listdir(REPO_PATH):
+        for file in os.listdir(PACKAGES_PATH + "/" + name):
             if name in file:
-                version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file).group(1)
+                # SAME AS ABOVE
+                version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file)
+                if version is not None:
+                    version = version.group(1)
+                else:
+                    continue
                 if new_version != version:  # skip old packages
                     continue
                 print("VERSION: " + version)
+                print(file)
+                if os.path.exists(REPO_PATH + "/" + file):
+                    continue
+                shutil.move(PACKAGES_PATH + "/" + name + "/" + file, REPO_PATH)
+                os.symlink(REPO_PATH + "/" + file, PACKAGES_PATH + "/" + name + "/" + file)
                 add_to_repo(REPO_PATH + "/" + file)
                 found = True
     if found:
@@ -196,7 +223,8 @@ def update_packages():
                                              shell=True,
                                              stderr=subprocess.STDOUT).decode("utf-8")
         except subprocess.CalledProcessError as e:
-            if "error: Your local changes to the following files would be overwritten by merge" in e.output.decode('utf-8'):
+            if "error: Your local changes to the following files would be overwritten by merge" in e.output.decode(
+                    'utf-8'):
                 print(os.getcwd())
                 change_workdir(PACKAGES_PATH)
                 try:
@@ -277,6 +305,8 @@ def create_directories():
     os.makedirs(PACKAGES_PATH, exist_ok=True)
     os.makedirs(LOG_PATH, exist_ok=True)
     os.makedirs(REPO_PATH, exist_ok=True)
+    os.makedirs(CHROOT_PATH, exist_ok=True)
+    # os.makedirs(CHROOT_PATH + "/root", exist_ok=True)
 
 
 def log_to_file(filename, content, mode="w"):

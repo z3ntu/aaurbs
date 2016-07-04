@@ -6,7 +6,7 @@ import sqlite3
 import sys
 
 import flask
-import flask.ext.login as flask_login
+import flask_login
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import config
@@ -17,9 +17,10 @@ class User(flask_login.UserMixin):
     pass
 
 
-def main():
-    app = flask.Flask(__name__)
+app = flask.Flask(__name__)
 
+
+def main():
     app.secret_key = config.secret_key
     login_manager = flask_login.LoginManager()
     login_manager.init_app(app)
@@ -32,11 +33,13 @@ def main():
     def register():
         username = flask.request.json.get('username')
         if len(username) > 64:
-            return flask.Response("{\"status\": \"error\", \"error_message\": \"Please use a username shorter than 64 characters.\"}",
-                                  mimetype="application/json")
+            return flask.Response(
+                "{\"status\": \"error\", \"error_message\": \"Please use a username shorter than 64 characters.\"}",
+                mimetype="application/json")
         if len(flask.request.json.get("pw")) > 64:
-            return flask.Response("{\"status\": \"error\", \"error_message\": \"Please use a password shorter than 64 characters.\"}",
-                                  mimetype="application/json")
+            return flask.Response(
+                "{\"status\": \"error\", \"error_message\": \"Please use a password shorter than 64 characters.\"}",
+                mimetype="application/json")
         passwordhash = generate_password_hash(flask.request.json.get('pw'))
         db = get_db()
         userexists = len(db.execute("SELECT username FROM users WHERE username=?", (username,)).fetchall()) != 0
@@ -120,7 +123,8 @@ def main():
             return flask.Response("{\"status\": \"error\", \"error_message\": \"package not found\"}",
                                   mimetype="application/json")
         return flask.Response(
-            json.dumps({"status": "ok", "package_name": package[0], "build_status": package[1], "package_version": package[2]}),
+            json.dumps({"status": "ok", "package_name": package[0], "build_status": package[1],
+                        "package_version": package[2]}),
             mimetype="application/json")
 
     @app.route('/api/get_build_log')
@@ -180,20 +184,6 @@ def main():
         return flask.Response("{\"status\": \"error\", \"error_message\": \"Not authorized.\"}",
                               mimetype="application/json")
 
-    if config.use_ssl:
-        ssl_context = ('server.crt', 'server.key')
-    else:
-        ssl_context = None
-
-    try:
-        app.run(host=config.host,
-                port=config.port,
-                ssl_context=ssl_context,
-                debug=config.debug)
-    except OSError as err:
-        print("[ERROR] " + err.strerror, file=sys.stderr)
-        print("[ERROR] The program will now terminate.", file=sys.stderr)
-
 
 def get_db():
     if not hasattr(flask.g, 'sqlite_db'):
@@ -201,5 +191,21 @@ def get_db():
     return flask.g.sqlite_db
 
 
+main()
+
 if __name__ == '__main__':
-    main()
+    try:
+        if config.use_wsgi:
+            app.run(debug=config.debug)
+        else:
+            if config.use_ssl:
+                ssl_context = ('server.crt', 'server.key')
+            else:
+                ssl_context = None
+            app.run(host=config.host,
+                    port=config.port,
+                    ssl_context=ssl_context,
+                    debug=config.debug)
+    except OSError as err:
+        print("[ERROR] " + err.strerror, file=sys.stderr)
+        print("[ERROR] The program will now terminate.", file=sys.stderr)

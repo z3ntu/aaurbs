@@ -306,7 +306,6 @@ def create_directories():
     os.makedirs(LOG_PATH, exist_ok=True)
     os.makedirs(REPO_PATH, exist_ok=True)
     os.makedirs(CHROOT_PATH, exist_ok=True)
-    # os.makedirs(CHROOT_PATH + "/root", exist_ok=True)
 
 
 def log_to_file(filename, content, mode="w"):

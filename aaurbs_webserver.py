@@ -140,7 +140,7 @@ def main():
                 return flask.Response("No logs for package were found.", mimetype="text/plain")
             directory.sort(reverse=True)
             try:
-                return flask.Response(open(LOG_PATH + "/" + package_name + "/" + directory[0]).read(),
+                return flask.Response(open(LOG_PATH + "/" + package_name + "/" + directory[0], encoding='utf-8').read(),
                                       mimetype="text/plain")
             except UnicodeDecodeError as e:
                 return flask.Response("Error while reading the log file: " + str(e), mimetype="text/plain")

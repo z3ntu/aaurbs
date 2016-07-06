@@ -1,20 +1,5 @@
 {
   "name": "aaurbs",
-  "homepage": "https://github.com/z3ntu/aaurbs",
-  "authors": [
-    "Luca Weiss <WEI16416@spengergasse.at>"
-  ],
-  "description": "Automated AUR build system",
-  "main": "",
-  "license": "",
-  "private": true,
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
   "dependencies": {
     "bootstrap": "^3.3.6",
     "font-awesome": "^4.6.1",

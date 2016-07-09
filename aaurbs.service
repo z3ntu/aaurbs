@@ -5,4 +5,4 @@ Description=aaurbs
 Type=simple
 User=aur
 Group=aur
-ExecStart=/aur/aaurbs/aaurbs.py
+ExecStart=/srv/aaurbs/aaurbs.py

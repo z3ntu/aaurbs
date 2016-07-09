@@ -1,9 +1,0 @@
-[Unit]
-Description=aaurbs_webserver
-
-[Service]
-Type=simple
-User=aur
-Group=aur
-WorkingDirectory=/aur/aaurbs/
-ExecStart=/aur/aaurbs/aaurbs_webserver.py

@@ -14,11 +14,14 @@ base_path = "/aur"
 delta = False
 
 # --- WEBSERVER ---
+# If flask should be started in debug mode
+debug = False
+# Use WSGI? If yes, the options under this are all invalid and you have to have WSGI configured
+use_wsgi = True
 # Port to run the webserver
 port = 8080
 # Host (use 0.0.0.0 to listen on all interfaces, just modify it if you know what you are doing!)
 host = '0.0.0.0'
-# If flask should be started in debug mode
-debug = False
+
 # Should the webserver be secured with ssl? If yes, there has to be a server.crt & server.key file.
-use_ssl = True
+use_ssl = False

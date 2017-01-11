@@ -80,7 +80,7 @@ app.controller("PackagesController", function ($scope, $rootScope, $http, $uibMo
                     }
                 });
             }
-        });
+        }, angular.noop);
     }
 });
 
@@ -115,7 +115,7 @@ app.controller("ModalController", function ($scope, $rootScope, $http, $uibModal
             if (return_array[0]) {
                 $uibModalInstance.close(return_array);
             }
-        });
+        }, angular.noop);
     };
 });
 

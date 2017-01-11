@@ -1,15 +1,17 @@
 #!/usr/bin/env python
-
+import glob
+import grp
 import os
 import pwd
-import grp
+import re
+import shutil
 import sqlite3
 import subprocess
-import shutil
-import re
-import config
-import pkgbuild
 from time import strftime, gmtime
+
+import pkgbuild
+
+import config
 
 AUR_BASE_PATH = config.base_path
 PACKAGES_PATH = AUR_BASE_PATH + "/packages"
@@ -69,7 +71,7 @@ def change_workdir(directory):
 def add_package(name, db):
     if not os.path.isdir(PACKAGES_PATH + "/" + name):
         change_workdir(PACKAGES_PATH)
-        output = subprocess.check_output("git clone -q https://aur.archlinux.org/" + name + ".git", shell=True,
+        output = subprocess.check_output(["git", "clone", "-q", "https://aur.archlinux.org/" + name + ".git"],
                                          stderr=subprocess.STDOUT).decode("utf-8")
         if output == "warning: You appear to have cloned an empty repository.\n":
             if os.path.isdir(PACKAGES_PATH + "/" + name):
@@ -89,11 +91,24 @@ def add_package(name, db):
 
 
 def remove_package(name, db):
-    if os.path.isdir(PACKAGES_PATH + "/" + name) and os.path.isdir(LOG_PATH + "/" + name):
+    if os.path.isdir(PACKAGES_PATH + "/" + name):
         shutil.rmtree(PACKAGES_PATH + "/" + name)
-        shutil.rmtree(LOG_PATH + "/" + name)
+        if os.path.isdir(LOG_PATH + "/" + name):
+            shutil.rmtree(LOG_PATH + "/" + name)
+        else:
+            print("Could find log directory of '" + name + "'")
         db.execute("DELETE FROM packages WHERE package_name=?", (name,))
         db.commit()
+        repofilelist = glob.glob(REPO_PATH + "/" + name + "-*")
+        if repofilelist:
+            for f in repofilelist:
+                print("Removing file: " + f)
+                os.remove(f)
+        else:
+            print("Could not find binary packages for '" + name + "'")
+        output = subprocess.check_output(["repo-remove", REPO_FILE, name],
+                                         stderr=subprocess.STDOUT).decode("utf-8")
+        print(output)
         print("Removed package '" + name + "'")
         return True
     else:
@@ -107,9 +122,11 @@ def build_package(name, clean="c", srcinfo=None):
     if srcinfo is None:
         srcinfo = pkgbuild.SRCINFO(".SRCINFO").content
     try:
+        env = os.environ.copy()
+        env["PKGDEST"] = REPO_PATH
         output = subprocess.check_output(
-            "PKGDEST='" + REPO_PATH + "' makepkg -sr" + clean + " --noconfirm --noprogressbar",
-            shell=True,
+            ["makepkg", "-sr" + clean, "--noconfirm", "--noprogressbar"],
+            env=env,
             stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as e:  # non-zero exit code
         if b"ERROR: A package has already been built." in e.output:
@@ -160,7 +177,8 @@ def build_package(name, clean="c", srcinfo=None):
     else:
         for file in os.listdir(REPO_PATH):
             if name in file:
-                version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file).group(1)
+                version = re.search(name + '-(.+?)-(x86_64|i686|armv6h|armv7h|aarch64|arm|any).pkg.tar.xz', file).group(
+                    1)
                 if new_version != version:  # skip old packages
                     continue
                 print("VERSION: " + version)
@@ -178,8 +196,11 @@ def add_to_repo(filename):
     print("Adding " + filename + " to database.")
     # the --remove parameter automatically removes old files!! :)
     try:
-        output = subprocess.check_output("repo-add --remove " + delta + " " + REPO_FILE + " " + filename,
-                                         shell=True,
+        if delta:  # TODO: Make better?
+            command = ["repo-add", "--remove", delta, REPO_FILE, filename]
+        else:
+            command = ["repo-add", "--remove", REPO_FILE, filename]
+        output = subprocess.check_output(command,
                                          stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as e:
         print(e)
@@ -192,17 +213,17 @@ def update_packages():
     for package in os.listdir(PACKAGES_PATH):
         change_workdir(PACKAGES_PATH)
         try:
-            output = subprocess.check_output("git -C " + package + " pull",
-                                             shell=True,
+            output = subprocess.check_output(["git", "-C", package, "pull"],
                                              stderr=subprocess.STDOUT).decode("utf-8")
         except subprocess.CalledProcessError as e:
-            if "error: Your local changes to the following files would be overwritten by merge" in e.output.decode('utf-8'):
+            if "error: Your local changes to the following files would be overwritten by merge" in e.output.decode(
+                    'utf-8'):
                 print(os.getcwd())
                 change_workdir(PACKAGES_PATH)
                 try:
                     print("Resetting the root package dir!")
-                    subprocess.check_output("git -C " + package + " fetch --all", shell=True)
-                    subprocess.check_output("git -C " + package + " reset --hard origin/master", shell=True)
+                    subprocess.check_output(["git", "-C", package, "fetch", "-all"])
+                    subprocess.check_output(["git", "-C", package, "reset", "--hard", "origin/master"])
                     output = "Succesfully pulled!"
                 except Exception as ex:
                     print(ex)
@@ -243,8 +264,7 @@ def check_vcs(package):
     elif re.search('-git', package):
         try:
             output = subprocess.check_output(
-                "git -C " + package + "/src/" + folder + " fetch",
-                shell=True,
+                ["git", "-C", package + "/src/" + folder, "fetch"],
                 stderr=subprocess.STDOUT).decode("utf-8")  # TODO: Test if this actually works.
         except subprocess.CalledProcessError as e:
             database.execute("UPDATE packages SET build_status=? WHERE package_name=?", (2, package))

@@ -40,3 +40,6 @@ pacman -S python python-flask python-flask-login # and maybe xdelta3
 - Copy/symlink the `wsgi-aaurbs.conf` file to `/etc/httpd/conf/extra/`
 - Place the line `Include conf/extra/wsgi-aaurbs.conf` somewhere at the end of `/etc/httpd/conf/httpd.conf`
 - Note that some parts of the part "Start" is not valid with this method. If you need help, please file an issue or contact me.
+
+
+Please note, that `PKGEXT` has to be `PKGEXT='.pkg.tar'` in `/etc/makepkg.conf`.

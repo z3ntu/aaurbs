@@ -211,6 +211,7 @@ def update_packages():
                 print(e)
                 print(e.output.decode('utf-8'))
                 continue
+        print(package)
         if output != "Already up-to-date.\n":  # new version
             build_package(package)
         elif database.execute("SELECT build_status FROM packages WHERE package_name=?", (package,)).fetchone()[

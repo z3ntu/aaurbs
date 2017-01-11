@@ -9,15 +9,19 @@ app.config(function ($routeProvider) {
     });
 });
 
+app.config(['$locationProvider', function ($locationProvider) {
+    $locationProvider.hashPrefix('');
+}]);
+
 app.controller("CatchAllCtrl", function ($scope, $routeParams) {
     $scope.templatePath = "snippets/" + $routeParams.templatePath + ".html";
 });
 
 app.controller("HeaderController", function ($scope, $rootScope, $location, $http) {
-    $rootScope.update_user_data = function() {
-        $http.get("/api/get_user_info").success(function (data) {
-            $rootScope.loggedin = data.status != "error";
-            $rootScope.user = data;
+    $rootScope.update_user_data = function () {
+        $http.get("/api/get_user_info").then(function (response) {
+            $rootScope.loggedin = response.data.status != "error";
+            $rootScope.user = response.data;
         });
     };
     $scope.navCollapsed = true;
@@ -27,7 +31,7 @@ app.controller("HeaderController", function ($scope, $rootScope, $location, $htt
     $rootScope.update_user_data();
 
     $scope.logout = function () {
-        $http.post("/api/logout", null).success(function () {
+        $http.post("/api/logout", null).then(function () {
             $rootScope.loggedin = false;
             $rootScope.user = null;
             $location.path("/");
@@ -40,11 +44,11 @@ app.controller("HeaderController", function ($scope, $rootScope, $location, $htt
 
 app.controller("ProfileController", function ($scope, $rootScope, $http) {
     $rootScope.roles = ["Administator", "Guest"];
-    $http.get("/api/get_user_info").success(function (data) {
-        if (data.status == "error") {
-            $scope.error_message = data.error_message;
+    $http.get("/api/get_user_info").then(function (response) {
+        if (response.data.status == "error") {
+            $scope.error_message = response.data.error_message;
         } else {
-            $scope.user = data;
+            $scope.user = response.data;
         }
     });
 });
@@ -53,8 +57,8 @@ app.controller("PackagesController", function ($scope, $rootScope, $http, $uibMo
     $rootScope.reasons = ["Unknown", "Success", "Unknown error!", "A failure occurred in check().", "Missing dependencies.", "Validity check failed.", "PGP signature verification failed."];
     $scope.sortField = 'package_name';
     $scope.reverse = false;
-    $http.get("/api/get_packages").success(function (data) {
-        $scope.packages = data;
+    $http.get("/api/get_packages").then(function (response) {
+        $scope.packages = response.data;
     });
 
     $scope.openModal = function (package_info) {
@@ -92,8 +96,8 @@ app.controller("ModalController", function ($scope, $rootScope, $http, $uibModal
             return;
         } // fetch the log only the first time
         $scope.log_loaded = true;
-        $http.get("/api/get_build_log", {params: {package_name: $scope.package.package_name}}).success(function (data) {
-            $scope.build_log = data;
+        $http.get("/api/get_build_log", {params: {package_name: $scope.package.package_name}}).then(function (response) {
+            $scope.build_log = response.data;
             $scope.isCollapsed = false;
         });
     };
@@ -122,9 +126,9 @@ app.controller("ConfirmationDialogController", function ($scope, $uibModalInstan
     };
     $scope.remove = function (package_name) {
         console.log("Removing package '" + package_name + "'.");
-        $http.post("/api/remove_package", {"package_name": package_name}).success(function (data) {
-            if (data.status == "error") {
-                $scope.response = "Error while removing package: " + data.error_message;
+        $http.post("/api/remove_package", {"package_name": package_name}).then(function (response) {
+            if (response.data.status == "error") {
+                $scope.response = "Error while removing package: " + response.data.error_message;
             } else {
                 console.log("Package '" + package_name + "' was successfully removed.");
                 $uibModalInstance.close([true, package_name]);
@@ -133,16 +137,16 @@ app.controller("ConfirmationDialogController", function ($scope, $uibModalInstan
     }
 });
 
-app.controller("AddPackageController", function ($scope, $http, $timeout) {
+app.controller("AddPackageController", function ($scope, $http, $timeout, $sce) {
     $scope.valid_package = false;
     $scope.add_package = function (package_name) {
         if ($scope.valid_package != true) {
             $scope.response = "Invalid package.";
             return;
         }
-        $http.post("/api/add_package", {"package_name": package_name}).success(function (data) {
-            if (data.status == "error") {
-                $scope.response = "Error while adding package: " + data.error_message;
+        $http.post("/api/add_package", {"package_name": package_name}).then(function (response) {
+            if (response.data.status == "error") {
+                $scope.response = "Error while adding package: " + response.data.error_message;
             } else {
                 $scope.response = "Package '" + package_name + "' was successfully added.";
                 $scope.package_name = "";
@@ -158,16 +162,15 @@ app.controller("AddPackageController", function ($scope, $http, $timeout) {
             return;
         }
         $scope.timeout = $timeout(function () {
-            $http.jsonp("https://aur.archlinux.org/rpc/", {
+            $http.jsonp($sce.trustAsResourceUrl("https://aur.archlinux.org/rpc/"), {
                 params: {
                     v: "5",
                     type: "info",
-                    "arg[]": input,
-                    callback: "JSON_CALLBACK"
+                    "arg[]": input
                 }
-            }).success(function (data) {
+            }).then(function (response) {
                 $scope.timeout = null;
-                $scope.valid_package = data.resultcount != 0;
+                $scope.valid_package = response.data.resultcount != 0;
             });
         }, 300);
 
@@ -176,9 +179,9 @@ app.controller("AddPackageController", function ($scope, $http, $timeout) {
 
 app.controller("RegisterController", function ($scope, $http) {
     $scope.register_user = function (username, pw) {
-        $http.post("/api/register", {"username": username, "pw": pw}).success(function (data) {
-            if (data.status == "error") {
-                $scope.response = "Error while registering: " + data.error_message;
+        $http.post("/api/register", {"username": username, "pw": pw}).then(function (response) {
+            if (response.data.status == "error") {
+                $scope.response = "Error while registering: " + response.data.error_message;
             } else {
                 $scope.response = "User '" + username + "' was successfully registered.";
                 $scope.success = true;
@@ -191,9 +194,9 @@ app.controller("RegisterController", function ($scope, $http) {
 
 app.controller("LoginController", function ($scope, $http, $location, $rootScope) {
     $scope.login = function (username, pw) {
-        $http.post("/api/login", {"username": username, "pw": pw}).success(function (data) {
-            if (data.status == "error") {
-                $scope.response = "Error while logging in: " + data.error_message;
+        $http.post("/api/login", {"username": username, "pw": pw}).then(function (response) {
+            if (response.data.status == "error") {
+                $scope.response = "Error while logging in: " + response.data.error_message;
             } else {
                 $scope.response = "You were successfully logged in.";
                 $rootScope.update_user_data(); // set $rootScope.user to the user object

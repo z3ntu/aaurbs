@@ -1,9 +1,9 @@
 <div ng-controller="ProfileController">
-    <div ng-if="user != null">
+    <div ng-if="user !== null">
         <p><b>Username: </b>{{user.username}}</p>
         <p><b>Role: </b>{{user.role}} ({{roles[user.role]}})</p>
         <br>
-        <i ng-if="user.role != 0">Please contact the administator for changes.</i>
+        <i ng-if="user.role !== 0">Please contact the administator for changes.</i>
     </div>
-    <h3 ng-if="user == null">{{error_message}}</h3>
+    <h3 ng-if="user === null">{{error_message}}</h3>
 </div>

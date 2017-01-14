@@ -1,0 +1,6 @@
+<div ng-controller="CheckOrphanController">
+    <h3>Broken packages</h3>
+    <div ng-repeat="package_name in packages.broken"><a target="_blank" href="https://www.mail-archive.com/search?l=aur-requests%40archlinux.org&q={{package_name}}">{{package_name}}</a></div>
+    <h3>Good packages</h3>
+    <div ng-repeat="package_name in packages.good"><a target="_blank" href="https://aur.archlinux.org/packages/{{package_name}}/">{{package_name}}</a></div>
+</div>

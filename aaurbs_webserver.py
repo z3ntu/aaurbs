@@ -7,6 +7,7 @@ import sys
 
 import flask
 import flask_login
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import config
@@ -135,7 +136,7 @@ def get_package_info():
         mimetype="application/json")
 
 
-@app.route('/api/get_build_log')
+@app.route('/api/get_build_log', methods=['GET'])
 def get_log():
     package_name = flask.request.args.get("package_name")
     if package_name is None:
@@ -154,7 +155,7 @@ def get_log():
             return flask.Response("Error while reading the log file: " + str(e), mimetype="text/plain")
 
 
-@app.route('/api/download_file/<package_name>')
+@app.route('/api/download_file/<package_name>', methods=['GET'])
 def download_file(package_name):
     package_version = get_db().execute(
         "SELECT package_version FROM packages WHERE package_name=?", (package_name,)).fetchone()
@@ -165,6 +166,25 @@ def download_file(package_name):
         if file.endswith(".pkg.tar.xz") and file.startswith(package_name + "-" + package_version):
             return flask.send_file(REPO_PATH + "/" + file, as_attachment=True, attachment_filename=file)
     return flask.Response("Binary package not found.", mimetype="text/plain")
+
+
+@app.route('/api/check_orphans', methods=['GET'])
+@flask_login.login_required
+def check_orphans():
+    db_packages = get_db().execute("SELECT package_name FROM packages").fetchall()
+    good_packages = []
+    broken_packages = []
+    request_url = "https://aur.archlinux.org/rpc/?v=5&type=info"
+    for package in db_packages:
+        request_url += "&arg[]=" + package[0]
+        broken_packages.append(package[0])  # all packages are guilty until they are proven innocent
+    resp = requests.get(request_url)
+    for package_obj in resp.json()["results"]:
+        package = package_obj["Name"]
+        print(package)
+        good_packages.append(package)
+        broken_packages.remove(package)
+    return flask.Response(json.dumps({"good": good_packages, "broken": broken_packages}), mimetype="text/plain")
 
 
 @app.route('/<path:filename>')

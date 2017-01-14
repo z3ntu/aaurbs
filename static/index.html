@@ -28,13 +28,13 @@
 
         <div class="collapse navbar-collapse" uib-collapse="navCollapsed" ng-click="navCollapsed=true;">
             <ul class="nav navbar-nav">
-                <li ng-class="{active: isActive('/')}"><a ng-href="#/">Home <span class="sr-only">(current)</span></a></li>
-                <li ng-class="{active: isActive('/packages')}"><a ng-href="#/packages">Packages</a></li>
-                <li ng-show="user.role == '0'" ng-class="{active: isActive('/add_package')}"><a ng-href="#/add_package">Add package</a></li>
+                <li ng-class="{active: isActive('/')}"><a href="#/">Home <span class="sr-only">(current)</span></a></li>
+                <li ng-class="{active: isActive('/packages')}"><a href="#/packages">Packages</a></li>
+                <li ng-show="user.role === '0'" ng-class="{active: isActive('/add_package')}"><a href="#/add_package">Add package</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li ng-show="loggedin" ng-class="{active: isActive('/profile')}"><a ng-href="#/profile">Profile</a></li>
-                <li ng-show="!loggedin" ng-class="{active: isActive('/login')}"><a ng-href="#/login">Login</a></li>
+                <li ng-show="loggedin" ng-class="{active: isActive('/profile')}"><a href="#/profile">Profile</a></li>
+                <li ng-show="!loggedin" ng-class="{active: isActive('/login')}"><a href="#/login">Login</a></li>
                 <li ng-show="loggedin"><a ng-click="logout()" href="">Logout</a></li>
             </ul>
         </div>

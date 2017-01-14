@@ -20,7 +20,7 @@ app.controller("CatchAllCtrl", function ($scope, $routeParams) {
 app.controller("HeaderController", function ($scope, $rootScope, $location, $http) {
     $rootScope.update_user_data = function () {
         $http.get("/api/get_user_info").then(function (response) {
-            $rootScope.loggedin = response.data.status != "error";
+            $rootScope.loggedin = response.data.status !== "error";
             $rootScope.user = response.data;
         });
     };
@@ -45,11 +45,18 @@ app.controller("HeaderController", function ($scope, $rootScope, $location, $htt
 app.controller("ProfileController", function ($scope, $rootScope, $http) {
     $rootScope.roles = ["Administator", "Guest"];
     $http.get("/api/get_user_info").then(function (response) {
-        if (response.data.status == "error") {
+        if (response.data.status === "error") {
             $scope.error_message = response.data.error_message;
         } else {
             $scope.user = response.data;
         }
+    });
+});
+
+app.controller("CheckOrphanController", function ($scope, $rootScope, $http) {
+    $http.get("/api/check_orphans").then(function (response) {
+        $scope.packages = response.data;
+        console.log(response.data);
     });
 });
 
@@ -75,7 +82,7 @@ app.controller("PackagesController", function ($scope, $rootScope, $http, $uibMo
         modalInstance.result.then(function (return_array) {
             if (return_array[0]) {
                 $scope.packages.forEach(function (element, index) {
-                    if (element.package_name == return_array[1]) {
+                    if (element.package_name === return_array[1]) {
                         $scope.packages.splice(index, 1);
                     }
                 });
@@ -127,7 +134,7 @@ app.controller("ConfirmationDialogController", function ($scope, $uibModalInstan
     $scope.remove = function (package_name) {
         console.log("Removing package '" + package_name + "'.");
         $http.post("/api/remove_package", {"package_name": package_name}).then(function (response) {
-            if (response.data.status == "error") {
+            if (response.data.status === "error") {
                 $scope.response = "Error while removing package: " + response.data.error_message;
             } else {
                 console.log("Package '" + package_name + "' was successfully removed.");
@@ -140,12 +147,12 @@ app.controller("ConfirmationDialogController", function ($scope, $uibModalInstan
 app.controller("AddPackageController", function ($scope, $http, $timeout, $sce) {
     $scope.valid_package = false;
     $scope.add_package = function (package_name) {
-        if ($scope.valid_package != true) {
+        if ($scope.valid_package !== true) {
             $scope.response = "Invalid package.";
             return;
         }
         $http.post("/api/add_package", {"package_name": package_name}).then(function (response) {
-            if (response.data.status == "error") {
+            if (response.data.status === "error") {
                 $scope.response = "Error while adding package: " + response.data.error_message;
             } else {
                 $scope.response = "Package '" + package_name + "' was successfully added.";
@@ -154,7 +161,7 @@ app.controller("AddPackageController", function ($scope, $http, $timeout, $sce) 
         });
     };
     $scope.change_handler = function (input) {
-        if ($scope.timeout != null) {
+        if ($scope.timeout !== null) {
             $timeout.cancel($scope.timeout);
         }
         if (!input) {
@@ -170,7 +177,7 @@ app.controller("AddPackageController", function ($scope, $http, $timeout, $sce) 
                 }
             }).then(function (response) {
                 $scope.timeout = null;
-                $scope.valid_package = response.data.resultcount != 0;
+                $scope.valid_package = response.data.resultcount !== 0;
             });
         }, 300);
 
@@ -180,7 +187,7 @@ app.controller("AddPackageController", function ($scope, $http, $timeout, $sce) 
 app.controller("RegisterController", function ($scope, $http) {
     $scope.register_user = function (username, pw) {
         $http.post("/api/register", {"username": username, "pw": pw}).then(function (response) {
-            if (response.data.status == "error") {
+            if (response.data.status === "error") {
                 $scope.response = "Error while registering: " + response.data.error_message;
             } else {
                 $scope.response = "User '" + username + "' was successfully registered.";
@@ -195,7 +202,7 @@ app.controller("RegisterController", function ($scope, $http) {
 app.controller("LoginController", function ($scope, $http, $location, $rootScope) {
     $scope.login = function (username, pw) {
         $http.post("/api/login", {"username": username, "pw": pw}).then(function (response) {
-            if (response.data.status == "error") {
+            if (response.data.status === "error") {
                 $scope.response = "Error while logging in: " + response.data.error_message;
             } else {
                 $scope.response = "You were successfully logged in.";

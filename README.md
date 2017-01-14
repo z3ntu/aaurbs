@@ -42,4 +42,4 @@ pacman -S python python-flask python-flask-login # and maybe xdelta3
 - Note that some parts of the part "Start" is not valid with this method. If you need help, please file an issue or contact me.
 
 
-Please note, that `PKGEXT` has to be `PKGEXT='.pkg.tar'` in `/etc/makepkg.conf`.
+Please note, that `PKGEXT` has to be `PKGEXT='.pkg.tar.xz'` in `/etc/makepkg.conf`.

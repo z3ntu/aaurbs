@@ -16,7 +16,7 @@
             <td ng-if="package.package_version===0"><i class="fa fa-question" uib-popover="{{reasons[0]}}"
                                                        popover-trigger="mouseenter"></i></td>
             <td><i class="fa"
-                   ng-class="package.build_status===1 ? 'fa-check' : (package.build_status===0 ? 'fa-question' : 'fa-times')"
+                   ng-class="package.build_status==1 ? 'fa-check' : (package.build_status==0 ? 'fa-question' : 'fa-times')"
                    uib-popover="{{reasons[package.build_status]}}" popover-trigger="mouseenter"></i></td>
         </tr>
         </tbody>

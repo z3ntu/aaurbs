@@ -9,10 +9,6 @@ app.config(function ($routeProvider) {
     });
 });
 
-app.config(['$locationProvider', function ($locationProvider) {
-    $locationProvider.hashPrefix('');
-}]);
-
 app.controller("CatchAllCtrl", function ($scope, $routeParams) {
     $scope.templatePath = "snippets/" + $routeParams.templatePath + ".html";
 });

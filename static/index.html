@@ -23,18 +23,18 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" ng-href="#/">aaurbs</a>
+            <a class="navbar-brand" ng-href="#!/">aaurbs</a>
         </div>
 
         <div class="collapse navbar-collapse" uib-collapse="navCollapsed" ng-click="navCollapsed=true;">
             <ul class="nav navbar-nav">
-                <li ng-class="{active: isActive('/')}"><a href="#/">Home <span class="sr-only">(current)</span></a></li>
-                <li ng-class="{active: isActive('/packages')}"><a href="#/packages">Packages</a></li>
-                <li ng-show="user.role === '0'" ng-class="{active: isActive('/add_package')}"><a href="#/add_package">Add package</a></li>
+                <li ng-class="{active: isActive('/')}"><a href="#!/">Home <span class="sr-only">(current)</span></a></li>
+                <li ng-class="{active: isActive('/packages')}"><a href="#!/packages">Packages</a></li>
+                <li ng-show="user.role === '0'" ng-class="{active: isActive('/add_package')}"><a href="#!/add_package">Add package</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li ng-show="loggedin" ng-class="{active: isActive('/profile')}"><a href="#/profile">Profile</a></li>
-                <li ng-show="!loggedin" ng-class="{active: isActive('/login')}"><a href="#/login">Login</a></li>
+                <li ng-show="loggedin" ng-class="{active: isActive('/profile')}"><a href="#!/profile">Profile</a></li>
+                <li ng-show="!loggedin" ng-class="{active: isActive('/login')}"><a href="#!/login">Login</a></li>
                 <li ng-show="loggedin"><a ng-click="logout()" href="">Logout</a></li>
             </ul>
         </div>

@@ -14,7 +14,7 @@ extensions=(deb zip tar.gz tar.xz tar.bz2 bin)
 
 for i in ${extensions[@]}; do
     echo "Removing files with the extension: $i"
-    rm "$basepath"/packages/*/*."$i" || true
+    rm -v "$basepath"/packages/*/*."$i" || true
 done
 
 echo "Done."

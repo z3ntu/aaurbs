@@ -5,4 +5,5 @@ Description=aaurbs
 Type=simple
 User=aur
 Group=aur
+EnvironmentFile=/srv/aaurbs/environment.systemd
 ExecStart=/srv/aaurbs/aaurbs.py

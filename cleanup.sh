@@ -10,7 +10,7 @@ if [ ! -d "$basepath" ]; then
     exit 1
 fi
 
-extensions=(deb zip tar.gz tar.xz tar.bz2 bin)
+extensions=(deb zip tar.gz tar.xz tar.bz2 bin jar)
 
 for i in ${extensions[@]}; do
     echo "Removing files with the extension: $i"

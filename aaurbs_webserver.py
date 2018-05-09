@@ -32,6 +32,7 @@ def root():
 
 @app.route('/api/register', methods=['POST'])
 def register():
+    return flask.Response("{\"status\": \"error\", \"error_message\": \"Registrations are disabled.\"}")
     username = flask.request.json.get('username')
     if len(username) > 64:
         return flask.Response(
